@@ -10,7 +10,8 @@ const app = express()
 connecttodb()
 app.use(cors({
   origin: [
-    "http://localhost:5173"
+    "process.env.VITE_ORIGIN",
+    "https://quick-chat-tawny-eta.vercel.app/"
   ],
   credentials: true
 }));
