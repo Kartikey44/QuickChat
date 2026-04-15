@@ -68,9 +68,10 @@ export const signup = async (req, res) => {
     const token = user.generateAuthToken();
 
     res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: "lax"
-    });
+  httpOnly: true,
+  secure: true,        
+  sameSite: "None"     
+});
 
     res.status(201).json({
       success: true,
@@ -129,12 +130,11 @@ export const login = async (req, res) => {
     }
 
     const token = user.generateAuthToken();
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: "lax"
-    });
-
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,        
+  sameSite: "None"  
+});
     res.status(200).json({
       success: true,
       message: "Login successful",
