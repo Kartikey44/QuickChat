@@ -7,7 +7,7 @@ export default function ChatPage() {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/cd ");
+    navigate("/");
   };
 
   return (
