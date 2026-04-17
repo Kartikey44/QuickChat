@@ -6,8 +6,12 @@ export default function ChatPage() {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/");
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.log("Logout failed");
+    }
   };
 
   return (
