@@ -51,7 +51,15 @@ export const AuthProvider = ({ children }) => {
       setLoggingIn(false);
     }
   };
-
+  const logout = async () => {
+  try {
+    await axiosInstance.post("/auth/logout");
+    setAuthUser(null);
+    toast.success("Logged out successfully");
+  } catch (error) {
+    console.log("Error in logout:", error);
+  }
+};
   useEffect(() => {
     checkAuth();
   }, []);
@@ -59,6 +67,7 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider
       value={{
+        logout,
         authUser,
         login,
         loggingIn,
