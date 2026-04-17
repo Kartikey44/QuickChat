@@ -5,6 +5,7 @@ import Landing from "./pages/Landing";
 import ChatPage from "./pages/ChatPage";
 import Signup from "./pages/Signup";
 import { Toaster } from "react-hot-toast";
+import Login from "./pages/Login";
 
 function App() {
   const { authUser, isCheckingAuth } = useAuth();
@@ -27,7 +28,9 @@ function App() {
             <Route
               path="/signup"
               element={!authUser ? <Signup /> : <Navigate to="/chat" />}
-            />
+              />
+              <Route path="/login"
+                element={!authUser ?<Login/> :<Navigate to ="/chat"/>} />
           </Routes>
         )}
       </div>
