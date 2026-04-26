@@ -7,7 +7,7 @@ import NoChat from "../components/NoChat";
 import UnreadChats from "../components/UnreadChats";
 import ProfileHeader from "../components/ProfileHeader";
 import ActiveTabSwitch from "../components/ActiveTabSwitch";
-import { useChat } from "../context/chatcontext";
+import { useChat } from "../context/ChatContext";
 import SearchBar from "./SearchBar";
 import MinSideBar from "../components/MinSideBar";
 export default function ChatPage() {
