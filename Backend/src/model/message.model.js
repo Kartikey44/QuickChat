@@ -17,7 +17,7 @@ const messageSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-        isRead: {
+        seen: {
             type: Boolean,
             default: false,
         },

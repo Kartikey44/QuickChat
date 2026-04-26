@@ -89,3 +89,66 @@ export const sendMessage = async (req, res) => {
         res.status(500).json({ message: "Internal server error", success: false });
     }
 };
+export const getUnreadCount = async (req, res) => {
+     try {
+    const userId = req.user._id;
+
+    const count = await Message.countDocuments({
+      receiverId: userId,
+      seen: false,
+    });
+
+    res.status(200).json({ unreadCount: count });
+  } catch (error) {
+    console.log("Error in getUnreadCount:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+export const getUnreadChats = async (req, res) => {
+    try {
+    const userId = req.user._id;
+
+    const unread = await Message.aggregate([
+      {
+        $match: {
+          receiverId: userId,
+          seen: false,
+        },
+      },
+      {
+        $group: {
+          _id: "$senderId",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    res.status(200).json(unread);
+  } catch (error) {
+    console.log("Error in getUnreadPerChat:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+    }
+    
+}
+export const markMessagesAsRead = async (req, res) => {
+  try {
+    const { senderId } = req.params;
+    const receiverId = req.user._id;
+
+    await Message.updateMany(
+      {
+        senderId,
+        receiverId,
+        seen: false,
+      },
+      {
+        $set: { seen: true },
+      }
+    );
+
+    res.status(200).json({ message: "Messages marked as read" });
+  } catch (error) {
+    console.log("Error in markMessagesAsRead:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

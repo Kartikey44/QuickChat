@@ -37,13 +37,13 @@ function Login() {
   };
 
   return (
-    <div className="max-w-screen min-h-screen flex justify-center items-center p-4 bg-[#3c4147]">
-     <div className="w-full md:max-w-4xl md:h-[90%] h-3/4 max-w-2xl px-4 md:px-10 py-2" >  
+    <div className="max-w-screen min-h-screen flex justify-center items-center p-4 backdrop-blur-lg bg-linear-to-br from-[#2c2f33] to-[#1e2124]">
+     <div className="w-full md:max-w-4xl md:h-[90%] h-3/4 max-w-2xl py-2" >  
         <BorderAnimated>
           <div className="flex flex-col md:h-full md:flex-row w-full ">
           <form
             onSubmit={handleSubmit}
-            className="md:px-5 px-3 md:py-4 py-3 md:w-1/2 md:border-r border-slate-600/30 text-white flex flex-col gap-2 md:gap-6"
+            className="md:px-5 px-3 md:py-4 py-3 md:w-1/2 md:border-r border-slate-600/30 text-white flex flex-col gap-3 md:gap-6"
           >
             <div className="text-center flex flex-col gap-2 items-center">
               <img src={Logo} alt="logo" className="h-24 w-24" />
@@ -87,10 +87,11 @@ function Login() {
             })}
 
             
-            <button
+              <button
+                
               type="submit"
               disabled={loggingin}
-              className="bg-[#379BFF] cursor-pointer hover:bg-[#1289FF] transition py-2 rounded-md font-semibold disabled:opacity-50"
+              className="bg-[#379BFF] hover:bg-[#1289FF] transition py-2 rounded-md cursor-pointer font-semibold disabled:opacity-50"
             >
               {loggingin ? "logging in..." : "Login now"}
             </button>

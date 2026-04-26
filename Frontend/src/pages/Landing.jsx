@@ -6,7 +6,7 @@ function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div className='w-full min-h-screen flex justify-center  relative items-center bg-[#3c4147]'>
+    <div className='w-full min-h-screen flex justify-center  relative items-center bg-[url("/bgimg.png")] bg-cover bg-center'>
       <img src={Logo} className="h-25 w-25 absolute top-7 left-7" />
       <div
         onClick={() => navigate('/login')}

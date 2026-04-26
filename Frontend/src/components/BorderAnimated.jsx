@@ -19,7 +19,7 @@ const BorderAnimated = ({children}) => {
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setVisible(true)}
             onMouseLeave={() => setVisible(false)}
-            className="relative w-full h-full rounded-xl p-px bg-gray-900 backdrop-blur-md text-gray-800 overflow-hidden shadow-xl cursor-pointer"
+            className="relative w-full h-full rounded-xl p-px text-gray-800 overflow-hidden shadow-xl cursor-pointe"
         >
         
             <div
@@ -31,7 +31,7 @@ const BorderAnimated = ({children}) => {
                     left: position.x - 120
                 }}
             />
-            <div className="relative z-10 bg-gray-700/70 md:p-6 h-full w-full rounded-xl">
+            <div className="relative z-10 bg-[url('/bgimg.png')] bg-cover bg-no-repeat md:p-6 h-full w-full rounded-xl">
                {children} 
             </div>
         </div>

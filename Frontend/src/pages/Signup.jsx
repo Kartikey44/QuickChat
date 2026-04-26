@@ -43,7 +43,7 @@ function Signup() {
 
   return (
     <div className="h-screen flex justify-center items-center px-4 backdrop-blur-lg bg-linear-to-br from-[#2c2f33] to-[#1e2124]">
-      <div className="w-full md:max-w-4xl md:h-[90%] h-3/4 max-w-2xl md:py-2" >
+      <div className="w-full md:max-w-4xl md:h-[90%]  max-w-2xl md:py-2" >
         <BorderAnimated>
            <div className="flex flex-col md:h-full md:flex-row w-full ">
           <form
