@@ -7,13 +7,13 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import { ChatProvider } from './context/ChatContext.jsx'
 
 createRoot(document.getElementById('root')).render(
+  <StrictMode>
   <BrowserRouter>
-    <ChatProvider>
-      <AuthProvider>
-        <StrictMode>
-          <App />
-        </StrictMode>
-      </AuthProvider>
-    </ChatProvider>
+    <AuthProvider>
+      <ChatProvider>
+        <App />
+      </ChatProvider>
+    </AuthProvider>
   </BrowserRouter>
+</StrictMode>
 )
