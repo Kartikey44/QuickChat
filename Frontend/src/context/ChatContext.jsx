@@ -36,22 +36,7 @@ export const ChatProvider = ({ children }) => {
       setIsUserLoading(false);
     }
   };
- const fetchUnreadCounts = async () => {
-   try {
-     const res = await axiosInstance.get("/messages/unread-per-chat");
 
-     const data = Array.isArray(res.data) ? res.data : [];
-
-     const map = {};
-     data.forEach((item) => {
-       map[item._id.toString()] = item.count;
-     });
-
-     setUnreadCounts(map);
-   } catch (error) {
-     console.log("Error fetching unread counts", error);
-   }
- };
   const getMessages = async (userId) => {
     setIsMessageLoading(true);
     try {
