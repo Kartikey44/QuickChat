@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors'
 import authRoute from './routes/auth.routes.js'
 import messageRoute from './routes/message.routes.js'
+import uploadRoute from './routes/upload.routes.js'
 import cookieParser from 'cookie-parser';
 import connecttodb from './lib/db.js';
 dotenv.config()
@@ -19,4 +20,5 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use('/api/auth', authRoute)
 app.use('/api/messages', messageRoute)
+app.use('/api',uploadRoute)
 export default app;

@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
-  const [contacts, setContacts] = useState([]);
+  const [chats, setChats] = useState([]);
   const [messages, setMessages] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
   const [selectedUser, setSelectedUser] = useState(null);
@@ -13,18 +13,29 @@ export const ChatProvider = ({ children }) => {
   const [isUserLoading, setIsUserLoading] = useState(false);
   const [isMessageLoading, setIsMessageLoading] = useState(false);
 
+  const getMyChatPartners = async () => {
+    setIsUserLoading(true);
+    try {
+      const res = await axiosInstance.get("/messages/contacts");
+      setChats(res.data);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error fetching contacts");
+    }
+    finally {
+      setIsUserLoading(false);
+    }
+  };
   const getAllContacts = async () => {
     setIsUserLoading(true);
     try {
       const res = await axiosInstance.get("/messages/contacts");
-      setContacts(res.data);
+      setChats(res.data);
     } catch (error) {
       toast.error(error.response?.data?.message || "Error fetching contacts");
     } finally {
       setIsUserLoading(false);
     }
   };
-
   const fetchUnreadCounts = async () => {
     try {
       const res = await axiosInstance.get("/messages/unread-per-chat");
@@ -37,7 +48,6 @@ export const ChatProvider = ({ children }) => {
       console.log("Error fetching unread counts");
     }
   };
-
   const getMessages = async (userId) => {
     setIsMessageLoading(true);
     try {
@@ -49,7 +59,6 @@ export const ChatProvider = ({ children }) => {
       setIsMessageLoading(false);
     }
   };
-
   const markAsRead = async (userId) => {
     try {
       await axiosInstance.put(`/messages/mark-read/${userId}`);
@@ -61,7 +70,6 @@ export const ChatProvider = ({ children }) => {
       console.log("Error marking as read");
     }
   };
-
   const selectUser = async (user) => {
     setSelectedUser(user);
     await getMessages(user._id);
@@ -69,16 +77,14 @@ export const ChatProvider = ({ children }) => {
       await markAsRead(user._id);
     }
   };
-
   useEffect(() => {
     getAllContacts();
     fetchUnreadCounts();
   }, []);
-
   return (
     <ChatContext.Provider
       value={{
-        contacts,
+        chats,
         messages,
         activeTab,
         setActiveTab,
@@ -87,11 +93,11 @@ export const ChatProvider = ({ children }) => {
         unreadCounts,
         isUserLoading,
         isMessageLoading,
+        getMyChatPartners,
       }}
-    >
+    > 
       {children}
     </ChatContext.Provider>
   );
 };
-
 export const useChat = () => useContext(ChatContext);

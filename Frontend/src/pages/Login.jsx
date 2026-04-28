@@ -25,6 +25,7 @@ function Login() {
     e.preventDefault();
     try {
       await login(formData);
+      console.log("API URL:", import.meta.env.VITE_API_URL);
       navigate("/chat");
     } catch (error) {
       console.log("Error in login:", error.response?.data || error.message);

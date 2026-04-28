@@ -80,7 +80,8 @@ export const signup = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        profileimg: user.profileimg
+        profileimg: user.profileimg,
+        bio:user.bio
       },
       token
     });
@@ -142,7 +143,8 @@ res.cookie("token", token, {
         id: user._id,
         name: user.name,
         email: user.email,
-        profileimg: user.profileimg
+        profileimg: user.profileimg,
+        bio:user.bio
       },
       token
     });
@@ -179,7 +181,7 @@ export const logout = (req, res) => {
 export const updateProfile = async (req, res) => {
  try {
    const { profileimg } = req.body
-   if (!profileimg) return res.status(400).json({ message: "Profileimg is required" })
+   if (!profileimg) return res.status(400).json({ message: "profileimg is required" })
    const userId = req.user._id
    const uploadResponse = await cloudinary.uploader.upload(profileimg)
    const updateUser = await User.findByIdAndUpdate(

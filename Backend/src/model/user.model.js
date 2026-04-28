@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema({
     profileimg: {
         type: String,
         default: ""
+    },
+    bio:{
+        type: String,
+        default: "Hey there ! I am using QuickChat"
     }
 },
     { timestamps: true }
