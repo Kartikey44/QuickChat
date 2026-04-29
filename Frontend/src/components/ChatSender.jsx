@@ -7,24 +7,29 @@ function ChatSender() {
   const [tempMessage, setTempMessage] = useState("");
   const [file, setFile] = useState(null);
   const [isChatting, setIsChatting] = useState(false);
-
+  const [preview, setPreview] = useState(null);
   const containerRef = useRef(null);
 
   const { selectedUser, sendMessage } = useChat();
+const handleSend = async () => {
+  if (!tempMessage.trim() && !file) return;
 
- const handleSend = async () => {
-   if (!tempMessage.trim() && !file) return;
+  await sendMessage({
+    content: tempMessage,
+    receiverId: selectedUser._id,
+    image: file,
+  });
 
-   await sendMessage({
-     content: tempMessage,
-     receiverId: selectedUser._id,
-     image: file,
-   });
+  setTempMessage("");
+  setFile(null);
+  setPreview(null); 
+};
 
-   setTempMessage("");
-   setFile(null);
- };
-
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -67,11 +72,38 @@ function ChatSender() {
           <input
             type="file"
             className="hidden"
-            onChange={(e) => setFile(e.target.files[0])} // ✅ fix
+            accept="image/*"
+            onChange={(e) => {
+              const selectedFile = e.target.files[0];
+
+              if (selectedFile) {
+                setFile(selectedFile);
+                setPreview(URL.createObjectURL(selectedFile)); // 🔥 preview URL
+                setIsChatting(true); // show send button
+              }
+            }}
           />
         </label>
+        {preview && (
+          <div className=" fixed top-18 right-0 w-130 h-140 bg-gray-800 p-2 rounded-lg shadow-lg">
+            <img
+              src={preview}
+              alt="preview"
+              className="w-full h-full p-10 object-cover rounded"
+            />
 
-        {isChatting && (
+            <button
+              onClick={() => {
+                setFile(null);
+                setPreview(null);
+              }}
+              className="text-red-400 text-xs mt-1"
+            >
+              Remove
+            </button>
+          </div>
+        )}
+        {(isChatting || file) && (
           <button
             className="bg-cyan-500 rounded-full p-2 cursor-pointer"
             onClick={handleSend}

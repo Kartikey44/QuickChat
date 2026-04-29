@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axiosInstance from "../lib/axios";
 import toast from "react-hot-toast";
+import { useAuth } from "./AuthContext";
 
 const ChatContext = createContext();
 
@@ -74,9 +75,13 @@ const sendMessage = async ({ content, receiverId, image }) => {
       await markAsRead(user._id);
     }
   };
-  useEffect(() => {
-    getMyChatPartners();
-  }, []);
+ const { authUser } = useAuth();
+
+ useEffect(() => {
+   if (authUser) {
+     getMyChatPartners();
+   }
+ }, [authUser]);
   return (
     <ChatContext.Provider
       value={{

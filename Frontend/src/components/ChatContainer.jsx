@@ -31,9 +31,12 @@ function ChatContainer() {
       {/* CHAT AREA */}
       <div className="flex-1 overflow-y-auto px-4 bg-[#1b1c1c] py-2 space-y-3 flex flex-col justify-end">
         {Array.isArray(messages) &&
-          messages.map((msg) => (
+          messages.map((msg) =>
+            console.log("MESSAGE:", msg);
+        return(
             <div
               key={msg._id}
+              
               className={`flex ${
                 msg.senderId === authUser._id
                   ? "justify-end "
@@ -54,16 +57,14 @@ function ChatContainer() {
                   </div>
                 )}
 
-                {/* IMAGE */}
                 {msg.image && (
                   <div className="relative mt-1">
                     <img
                       src={msg.image}
                       alt="media"
-                      className="rounded-lg max-w-50"
+                      className="rounded-lg max-w-50 object-cover"
                     />
 
-                    {/* TIME on image (bottom-right overlay) */}
                     <p className="absolute bottom-1 right-2 text-[10px] text-white bg-black/40 px-1 rounded">
                       {new Date(msg.createdAt).toLocaleTimeString([], {
                         hour: "2-digit",

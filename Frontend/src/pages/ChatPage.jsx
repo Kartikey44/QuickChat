@@ -21,6 +21,7 @@ export default function ChatPage() {
 
   const handleLogout = async () => {
     try {
+      console.log("API URL:", import.meta.env.VITE_API_URL);
       await logout();
       navigate("/login");
     } catch {
