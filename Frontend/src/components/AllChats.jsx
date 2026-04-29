@@ -18,30 +18,31 @@ function AllChats() {
     return <UserLoading />;
   }
 
-  if (chats.length === 0) {
-    return <NoChatContainer />;
-  }
+if (!Array.isArray(chats) || chats.length === 0) {
+  return <NoChatContainer />;
+}
 
   return (
     <div className="space-y-3">
-      {chats.map((chat) => (
-        <div
-          key={chat._id}
-          className="bg-transparent px-4 py-2 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
-          onClick={() => selectUser(chat)}
-        >
-          <div className="flex items-center gap-5">
-            <div className="size-12 rounded-full overflow-hidden">
-              <img
-                src={chat.profileimg|| Avatar}
-                alt={chat.name}
-                className="w-full h-full object-cover"
-              />
+      {Array.isArray(chats) &&
+        chats.map((chat) => (
+          <div
+            key={chat._id}
+            className="bg-transparent px-4 py-2 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
+            onClick={() => selectUser(chat)}
+          >
+            <div className="flex items-center gap-5">
+              <div className="size-12 rounded-full overflow-hidden">
+                <img
+                  src={chat.profileimg || Avatar}
+                  alt={chat.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <p className="text-white font-medium">{chat.name}</p>
             </div>
-            <p className="text-white font-medium">{chat.name}</p>
           </div>
-        </div>
-      ))}
+        ))}
     </div>
   );
 }
