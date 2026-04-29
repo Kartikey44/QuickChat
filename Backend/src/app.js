@@ -8,10 +8,9 @@ import cookieParser from 'cookie-parser';
 import connecttodb from './lib/db.js';
 dotenv.config()
 const app = express()
-connecttodb()
 app.use(cors({
   origin: [
-    process.env.VITE_ORIGIN || process.env.FRONTEND_URL,
+     process.env.FRONTEND_URL || process.env.VITE_ORIGIN 
   ],
   credentials: true
 }));
