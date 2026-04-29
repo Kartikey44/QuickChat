@@ -31,51 +31,51 @@ function ChatContainer() {
       {/* CHAT AREA */}
       <div className="flex-1 overflow-y-auto px-4 bg-[#1b1c1c] py-2 space-y-3 flex flex-col justify-end">
         {Array.isArray(messages) &&
-          messages.map((msg) =>
-            console.log("MESSAGE:", msg);
-        return(
-            <div
-              key={msg._id}
-              
-              className={`flex ${
-                msg.senderId === authUser._id
-                  ? "justify-end "
-                  : "justify-start "
-              }`}
-            >
-              <div className="max-w-xs bg-[#347fea] rounded-lg px-3 py-2 text-white">
-                {/* TEXT */}
-                {msg.content && (
-                  <div className="flex gap-1">
-                    <p className="wrap-break-words">{msg.content}</p>
-                    <p className="text-[10px] text-gray-300 text-right mt-2 flex items-end">
-                      {new Date(msg.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                )}
+          messages.map((msg) => {
+            return (
+              <div
+                key={msg._id}
+                className={`flex ${
+                  msg.senderId === authUser._id
+                    ? "justify-end "
+                    : "justify-start "
+                }`}
+              >
+                <div className="max-w-xs bg-[#347fea] rounded-lg px-3 py-2 text-white">
+                  {/* TEXT */}
+                  {msg.content && (
+                    <div className="flex gap-1">
+                      <p className="wrap-break-words">{msg.content}</p>
+                      <p className="text-[10px] text-gray-300 text-right mt-2 flex items-end">
+                        {new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  )}
 
-                {msg.image && (
-                  <div className="relative mt-1">
-                    <img
-                      src={msg.image}
-                      alt="media"
-                      className="rounded-lg max-w-50 object-cover"
-                    />
+                  {/* IMAGE */}
+                  {msg.image && (
+                    <div className="relative mt-1">
+                      <img
+                        src={msg.image}
+                        alt="media"
+                        className="rounded-lg max-w-40 object-cover" 
+                      />
 
-                    <p className="absolute bottom-1 right-2 text-[10px] text-white bg-black/40 px-1 rounded">
-                      {new Date(msg.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                )}
+                      <p className="absolute bottom-1 right-2 text-[10px] text-white bg-black/40 px-1 rounded">
+                        {new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
       </div>
 
       {/* SENDER */}
