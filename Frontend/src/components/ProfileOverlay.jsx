@@ -4,6 +4,7 @@ import { RiArrowRightLongLine } from "react-icons/ri";
 import { GiCrossMark } from "react-icons/gi";
 import { FaPencilAlt } from "react-icons/fa";
 import axiosInstance from "../lib/axios";
+import toast from 'react-hot-toast'
 
 function ProfileOverlay({ user, onClose, onUpdate }) {
   const [name, setName] = useState(user.name || "");
@@ -25,6 +26,10 @@ function ProfileOverlay({ user, onClose, onUpdate }) {
   };
 
   const handleSaveName = () => {
+    if (tempName.length < 3) {
+      toast.error("Name must have at least 3 characters.")
+      return;
+    }
     setName(tempName);
     setIsEditingName(false);
   };
@@ -116,6 +121,11 @@ function ProfileOverlay({ user, onClose, onUpdate }) {
             className="w-full p-2 bg-transparent outline-none"
             value={isEditingName ? tempName : name}
             onChange={(e) => setTempName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSaveName();
+              }
+            }}
             readOnly={!isEditingName}
           />
 
@@ -147,6 +157,11 @@ function ProfileOverlay({ user, onClose, onUpdate }) {
             className="w-full p-2 bg-transparent outline-none"
             value={isEditingBio ? tempBio : bio}
             onChange={(e) => setTempBio(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSaveBio();
+              }
+            }}
             readOnly={!isEditingBio}
           />
 

@@ -6,7 +6,7 @@ import UserLoading from "./UserLoading";
 import NoChatContainer from "./NoChatContainer";
 
 function AllChats() {
-  const { getMyChatPartners, chats, isUserLoading, setSelectedUser } =
+  const { getMyChatPartners, chats, isUserLoading, selectUser } =
     useChat();
   const { authUser } = useAuth();
 
@@ -26,9 +26,9 @@ function AllChats() {
     <div className="space-y-3">
       {chats.map((chat) => (
         <div
-          key={chat.id}
+          key={chat._id}
           className="bg-transparent px-4 py-2 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
-          onClick={() => setSelectedUser(chat)}
+          onClick={() => selectUser(chat)}
         >
           <div className="flex items-center gap-5">
             <div className="size-12 rounded-full overflow-hidden">

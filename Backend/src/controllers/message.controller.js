@@ -67,27 +67,36 @@ export const getMessageByUserId = async (req, res) => {
         res.status(500).json({ message: "Internal server error", success: false });
     }
 };
+
 export const sendMessage = async (req, res) => {
-    try {
-        const senderId = req.user._id;
-        const { receiverId, content } = req.body;
+  try {
+    const senderId = req.user._id;
+    const { receiverId, content } = req.body;
 
-        const newMessage = new Message({
-            senderId,
-            receiverId,
-            content
-        });
+    const image = req.file ? req.file.path : null; 
 
-        await newMessage.save();
-
-        res.status(200).json({
-            message: "Message sent successfully",
-            success: true
-        });
-    } catch (error) {
-        console.log("Error in sending message", error);
-        res.status(500).json({ message: "Internal server error", success: false });
+    if (!content && !image) {
+      return res.status(400).json({
+        message: "Message must contain text or image",
+      });
     }
+
+    const newMessage = new Message({
+      senderId,
+      receiverId,
+      content,
+      image,
+    });
+    console.log("req.body:", req.body)
+    console.log("req.file:",req.file)
+    await newMessage.save();
+
+    res.status(200).json(newMessage); 
+
+  } catch (error) {
+    console.log("Error in sending message", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 export const getUnreadCount = async (req, res) => {
      try {
