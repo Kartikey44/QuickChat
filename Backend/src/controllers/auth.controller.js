@@ -5,6 +5,8 @@ import cloudinary from "../lib/cloundinary.js";
 
 dotenv.config();
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -69,8 +71,8 @@ export const signup = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
     });
 
     res.status(201).json({
@@ -133,8 +135,8 @@ export const login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
     });
 
     res.status(200).json({
@@ -162,8 +164,8 @@ export const logout = (req, res) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
       path: "/",
     });
 
