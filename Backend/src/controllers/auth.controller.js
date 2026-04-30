@@ -4,9 +4,6 @@ import { sendWelcomeEmail } from "../email/emailHandlers.js";
 import cloudinary from "../lib/cloundinary.js";
 
 dotenv.config();
-
-const isProduction = process.env.NODE_ENV === "production";
-
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -71,10 +68,9 @@ export const signup = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "None" : "Lax",
+      secure: true,
+      sameSite: "None",
     });
-
     res.status(201).json({
       success: true,
       message: "Signup successful",
@@ -90,7 +86,6 @@ export const signup = async (req, res) => {
     sendWelcomeEmail(user.email, user.name, process.env.CLIENT_URL)
       .then(() => console.log("Email sent"))
       .catch((err) => console.log("Email failed:", err.message));
-
   } catch (error) {
     console.error("SIGNUP ERROR:", error);
     res.status(500).json({
@@ -135,10 +130,9 @@ export const login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "None" : "Lax",
+      secure: true,
+      sameSite: "None",
     });
-
     res.status(200).json({
       success: true,
       message: "Login successful",
@@ -150,7 +144,6 @@ export const login = async (req, res) => {
         bio: user.bio,
       },
     });
-
   } catch (err) {
     console.error("LOGIN ERROR:", err);
     res.status(500).json({
@@ -164,11 +157,10 @@ export const logout = (req, res) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "None" : "Lax",
+      secure: true,
+      sameSite: "None",
       path: "/",
     });
-
     res.status(200).json({
       success: true,
       message: "Logout successful",
@@ -197,11 +189,10 @@ export const updateProfile = async (req, res) => {
     const updateUser = await User.findByIdAndUpdate(
       userId,
       { profileimg: uploadResponse.secure_url },
-      { new: true }
+      { new: true },
     );
 
     res.status(201).json(updateUser);
-
   } catch (error) {
     console.log("Error on updation of profile", error);
     res.status(500).json({ message: "Internal server error" });
