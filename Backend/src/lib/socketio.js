@@ -1,3 +1,4 @@
+// src/lib/socket.js
 import { Server } from "socket.io";
 import http from "http";
 import app from "../app.js";
@@ -17,24 +18,19 @@ io.use(socketAuthMiddleware);
 const userSocketMap = {};
 
 io.on("connection", (socket) => {
-  if (!socket.user) {
-    socket.disconnect();
-    return;
-  }
+  const user = socket.user;
+  const userId = user._id.toString();
 
-  const userId = socket.user._id.toString();
-
-  console.log("Connected:", socket.user.name);
+  console.log("✅ Connected:", user.fullName);
 
   userSocketMap[userId] = socket.id;
 
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
   socket.on("disconnect", () => {
-    console.log("Disconnected:", socket.user.name);
+    console.log("❌ Disconnected:", user.fullName);
 
     delete userSocketMap[userId];
-
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 });

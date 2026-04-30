@@ -14,6 +14,7 @@ export const AuthProvider = ({ children }) => {
   const [loggingIn, setLoggingIn] = useState(false);
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  
 
   const checkAuth = async () => {
     try {
@@ -95,6 +96,7 @@ export const AuthProvider = ({ children }) => {
     if (!authUser) disconnectSocket();
   }, [authUser]);
 
+ 
   return (
     <AuthContext.Provider
       value={{

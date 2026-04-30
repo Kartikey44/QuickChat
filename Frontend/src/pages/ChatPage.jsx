@@ -38,12 +38,19 @@ export default function ChatPage() {
 
       <div className="flex flex-1">
         {/* Left Panel */}
-        <SideBar/>
+        <SideBar />
         {/* Right Panel */}
         <div className="hidden md:flex flex-1">
           {selectedUser ? <ChatContainer /> : <NoChatContainer />}
         </div>
       </div>
+      {showProfile && (
+        <ProfileOverlay
+          user={authUser}
+          onClose={() => setShowProfile(false)}
+          onUpdate={setAuthUser}
+        />
+      )}
     </div>
   );
 }
