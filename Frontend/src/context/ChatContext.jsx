@@ -67,7 +67,18 @@ const sendMessage = async ({ content, receiverId, image }) => {
   } catch (error) {
     console.log("sendMessage error:", error.response?.data || error.message);
   }
-};
+  };
+  const getAllContacts = async () => {
+    setIsUserLoading(true);
+    try {
+      const res = await axiosInstance.get("/messages/all-contacts");
+      setChats(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error fetching users");
+    } finally {
+      setIsUserLoading(false);
+    }
+  };
   const selectUser = async (user) => {
     setSelectedUser(user);
     await getMessages(user._id);
@@ -79,7 +90,7 @@ const sendMessage = async ({ content, receiverId, image }) => {
 
  useEffect(() => {
    if (authUser) {
-     getMyChatPartners();
+     getAllContacts();
    }
  }, [authUser]);
   return (
@@ -87,6 +98,7 @@ const sendMessage = async ({ content, receiverId, image }) => {
       value={{
         chats,
         sendMessage,
+        getAllContacts,
         activeTab,
         selectedUser,
         getMessages,

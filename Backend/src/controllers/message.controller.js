@@ -1,53 +1,77 @@
 import Message from "../model/message.model.js";
 import User from "../model/user.model.js";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 dotenv.config();
 export const getAllContacts = async (req, res) => {
-    try {
-        const loggedInUserId = req.user._id;
-
-        const filteredUsers = await User.find({
-            _id: { $ne: loggedInUserId }
-        }).select("-password");
-
-        res.status(200).json(filteredUsers);
-    } catch (error) {
-        console.log("Error in getting all contact", error);
-        res.status(500).json({ message: "server error", success: false });
-    }
-};
-
-export const getChatPartners = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
 
     const users = await User.find({
-      _id: { $ne: loggedInUserId }
+      _id: { $ne: loggedInUserId },
     }).select("-password");
 
     res.status(200).json(users);
   } catch (error) {
-    console.log("Error in getting contacts", error);
-    res.status(500).json({ message: "server error", success: false });
+    console.log("Error in getAllContacts:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
+export const getChatPartners = async (req, res) => {
+  try {
+    const loggedInUserId = req.user._id;
+
+    const messages = await Message.find({
+      $or: [
+        { senderId: loggedInUserId },
+        { receiverId: loggedInUserId },
+      ],
+    });
+
+    const partnerIds = new Set();
+
+    messages.forEach((msg) => {
+      if (msg.senderId.toString() === loggedInUserId.toString()) {
+        partnerIds.add(msg.receiverId.toString());
+      } else {
+        partnerIds.add(msg.senderId.toString());
+      }
+    });
+
+    const users = await User.find({
+      _id: { $in: Array.from(partnerIds) },
+    }).select("-password");
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.log("Error in getChatPartners:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 export const getMessageByUserId = async (req, res) => {
-    try {
-        const myId = req.user._id;
-        const { id: userToChatId } = req.params;
+  try {
+    const myId = req.user._id;
+    const { id: userToChatId } = req.params;
 
-        const messages = await Message.find({
-            $or: [
-                { senderId: myId, receiverId: userToChatId },
-                { senderId: userToChatId, receiverId: myId }
-            ]
-        });
-
-        res.status(200).json({ messages, success: true });
-    } catch (error) {
-        console.log("Getting message Error", error);
-        res.status(500).json({ message: "Internal server error", success: false });
+    // 🔥 CRITICAL FIX
+    if (!mongoose.Types.ObjectId.isValid(userToChatId)) {
+      console.log("Invalid ID:", userToChatId);
+      return res.status(400).json({ message: "Invalid user ID" });
     }
+
+    const messages = await Message.find({
+      $or: [
+        { senderId: myId, receiverId: userToChatId },
+        { senderId: userToChatId, receiverId: myId },
+      ],
+    });
+
+    res.status(200).json({ messages });
+  } catch (error) {
+    console.log("Error in getMessageByUserId:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 };
 
 export const sendMessage = async (req, res) => {

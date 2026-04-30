@@ -5,11 +5,12 @@ import {
   sendMessage,
   getMessageByUserId,
   getChatPartners,
-  markMessagesAsRead
+  markMessagesAsRead,
+  getAllContacts
 } from "../controllers/message.controller.js";
 
 const router = express.Router();
-
+router.get("/all-contacts", protectRoute, getAllContacts);
 router.get("/contacts", protectRoute, getChatPartners);
 router.get("/:id", protectRoute, getMessageByUserId);
 
