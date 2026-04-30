@@ -1,14 +1,13 @@
-import app from "./app.js";
-import http from "http";
+import { server } from "./lib/socketio.js";
 import connecttodb from "./lib/db.js";
+import dotenv from "dotenv";
 
-const server = http.createServer(app);
-const port = process.env.PORT || 5000;
+dotenv.config();
+
+const PORT = process.env.PORT || 5000;
 
 connecttodb().then(() => {
-  console.log("✅ DB ready");
-
-  server.listen(port, () => {
-    console.log(`🚀 Server running at ${port}`);
+  server.listen(PORT, () => {
+    console.log(`Server running at ${PORT}`);
   });
 });

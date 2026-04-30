@@ -6,8 +6,7 @@ import UserLoading from "./UserLoading";
 import NoChatContainer from "./NoChatContainer";
 
 function AllChats() {
-  const { getMyChatPartners, chats, isUserLoading, selectUser } =
-    useChat();
+  const { getMyChatPartners, chats, isUserLoading, selectUser } = useChat();
   const { authUser } = useAuth();
 
   useEffect(() => {
