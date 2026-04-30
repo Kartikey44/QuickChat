@@ -7,16 +7,16 @@ import axiosInstance from "../lib/axios";
 import toast from 'react-hot-toast'
 
 function ProfileOverlay({ user, onClose, onUpdate }) {
-  const [name, setName] = useState(user.name || "");
-  const [tempName, setTempName] = useState(user.name || "");
+  const [name, setName] = useState(user.name );
+  const [tempName, setTempName] = useState(user.name);
   const [isEditingName, setIsEditingName] = useState(false);
 
-  const [bio, setBio] = useState(user.bio || "");
-  const [tempBio, setTempBio] = useState(user.bio || "");
+  const [bio, setBio] = useState(user.bio);
+  const [tempBio, setTempBio] = useState(user.bio);
   const [isEditingBio, setIsEditingBio] = useState(false);
 
   const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(user.profileimg || "");
+  const [preview, setPreview] = useState(user.profileimg);
 
   const [loading, setLoading] = useState(false);
 

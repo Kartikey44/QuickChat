@@ -16,38 +16,20 @@ export const getAllContacts = async (req, res) => {
         res.status(500).json({ message: "server error", success: false });
     }
 };
+
 export const getChatPartners = async (req, res) => {
-    try {
-        const loggedInUserId = req.user._id;
+  try {
+    const loggedInUserId = req.user._id;
 
-        const messages = await Message.find({
-            $or: [
-                { senderId: loggedInUserId },
-                { receiverId: loggedInUserId }
-            ]
-        });
+    const users = await User.find({
+      _id: { $ne: loggedInUserId }
+    }).select("-password");
 
-        const partnerIds = new Set();
-
-        messages.forEach((msg) => {
-            if (msg.senderId.toString() === loggedInUserId.toString()) {
-                partnerIds.add(msg.receiverId.toString());
-            }
-
-            if (msg.receiverId.toString() === loggedInUserId.toString()) {
-                partnerIds.add(msg.senderId.toString());
-            }
-        });
-
-        const partners = await User.find({
-            _id: { $in: Array.from(partnerIds) }
-        }).select("-password");
-
-        res.status(200).json(partners);
-    } catch (error) {
-        console.log("Error in getting chat partners", error);
-        res.status(500).json({ message: "server error", success: false });
-    }
+    res.status(200).json(users);
+  } catch (error) {
+    console.log("Error in getting contacts", error);
+    res.status(500).json({ message: "server error", success: false });
+  }
 };
 export const getMessageByUserId = async (req, res) => {
     try {
