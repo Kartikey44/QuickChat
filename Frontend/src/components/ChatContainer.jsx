@@ -41,7 +41,7 @@ function ChatContainer() {
                     : "justify-start "
                 }`}
               >
-                <div className="max-w-xs bg-gray-800 rounded-lg px-3 py-2 text-white">
+                <div className="max-w-xs rounded-lg px-3 py-2 text-white">
                   {/* TEXT */}
                   {msg.content && (
                     <div className="flex gap-1">
