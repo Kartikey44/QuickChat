@@ -1,4 +1,4 @@
-import Loader from "./components/sidebar/Loader";
+import Loader from "./components/Sidebar/Loader"
 import { useAuth } from "./context/AuthContext";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Landing from "./pages/Landing";
@@ -11,7 +11,7 @@ function App() {
   const { authUser, isCheckingAuth } = useAuth();
 
   return (
-    <div className="min-h-screen min-w-screen">        
+    <div className="min-h-screen min-w-screen">
       <div className="w-full max-w-8xl px-auto">
         {isCheckingAuth ? (
           <Loader fullScreen={false} />
@@ -28,9 +28,11 @@ function App() {
             <Route
               path="/signup"
               element={!authUser ? <Signup /> : <Navigate to="/chat" />}
-              />
-              <Route path="/login"
-                element={!authUser ?<Login/> :<Navigate to ="/chat"/>} />
+            />
+            <Route
+              path="/login"
+              element={!authUser ? <Login /> : <Navigate to="/chat" />}
+            />
           </Routes>
         )}
       </div>
