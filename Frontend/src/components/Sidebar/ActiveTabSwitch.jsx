@@ -15,14 +15,14 @@ function ActiveTabSwitch() {
         All
       </span>
 
-      <span
+      {/* <span
         onClick={() => setActiveTab("unread")}
         className={`cursor-pointer border border-white/10 rounded-full px-4 text-sm ${
           activeTab === "unread" ? "bg-fuchsia-600" : "bg-[#191919]"
         }`}
       >
         Unread
-      </span>
+      </span> */}
     </div>
   );
 }

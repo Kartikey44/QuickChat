@@ -2,14 +2,14 @@ import React from "react";
 import { useChat } from "../context/ChatContext";
 import Avatar from "../assets/Avatar.png";
 import UserLoading from "./Chat/UserLoading";
-import NoChatContainer from "./Chat/NoChatContainer";
+import NoChatAvailableContainer from "./Chat/NoChatStartContainer";
 
 function ChatPartners() {
   const { chatPartners, isUserLoading, selectUser } = useChat();
 
   if (isUserLoading) return <UserLoading />;
 
-  if (!chatPartners.length) return <NoChatContainer />;
+  if (!chatPartners.length) return <NoChatAvailableContainer />;
 
   return (
     <div className="space-y-3">
