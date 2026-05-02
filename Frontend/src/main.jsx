@@ -5,13 +5,16 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { ChatProvider } from './context/ChatContext.jsx'
+import { DataProvider } from './context/DataContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
   <BrowserRouter>
     <AuthProvider>
-      <ChatProvider>
-        <App />
+        <ChatProvider>
+          <DataProvider>
+            <App />
+            </DataProvider>
       </ChatProvider>
     </AuthProvider>
   </BrowserRouter>

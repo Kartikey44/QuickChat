@@ -4,18 +4,16 @@ import Avatar from "../assets/Avatar.png";
 import UserLoading from "./Chat/UserLoading";
 import NoChatContainer from "./Chat/NoChatContainer";
 
-function AllChats() {
-  const { chatPartners, newContacts, isUserLoading, selectUser } = useChat();
-
-  const allChats = [...chatPartners, ...newContacts];
+function ChatPartners() {
+  const { chatPartners, isUserLoading, selectUser } = useChat();
 
   if (isUserLoading) return <UserLoading />;
 
-  if (!allChats.length) return <NoChatContainer />;
+  if (!chatPartners.length) return <NoChatContainer />;
 
   return (
     <div className="space-y-3">
-      {allChats.map((chat) => (
+      {chatPartners.map((chat) => (
         <div
           key={chat._id}
           className="px-4 py-2 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
@@ -37,4 +35,4 @@ function AllChats() {
   );
 }
 
-export default AllChats;
+export default ChatPartners;

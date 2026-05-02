@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { MdOutlinePermMedia } from "react-icons/md";
 import { BsFillSendFill } from "react-icons/bs";
-import { useChat } from "../context/ChatContext";
+import { useChat } from "../../context/ChatContext";
 
 function ChatSender() {
   const [tempMessage, setTempMessage] = useState("");
@@ -11,19 +11,19 @@ function ChatSender() {
   const containerRef = useRef(null);
 
   const { selectedUser, sendMessage } = useChat();
-const handleSend = async () => {
-  if (!tempMessage.trim() && !file) return;
+  const handleSend = async () => {
+    if (!tempMessage.trim() && !file) return;
 
-  await sendMessage({
-    content: tempMessage,
-    receiverId: selectedUser._id,
-    image: file,
-  });
+    await sendMessage({
+      content: tempMessage,
+      receiverId: selectedUser._id,
+      image: file,
+    });
 
-  setTempMessage("");
-  setFile(null);
-  setPreview(null); 
-};
+    setTempMessage("");
+    setFile(null);
+    setPreview(null);
+  };
 
   useEffect(() => {
     return () => {

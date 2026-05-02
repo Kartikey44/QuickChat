@@ -105,6 +105,7 @@ export const AuthProvider = ({ children }) => {
         signup,
         logout,
         loggingIn,
+        setAuthUser,
         signingUp,
         isCheckingAuth,
         onlineUsers,

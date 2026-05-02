@@ -1,7 +1,7 @@
 import React from "react";
-import { useChat } from "../context/ChatContext";
-import { useAuth } from "../context/AuthContext";
-import Avatar from "../assets/Avatar.png";
+import { useChat } from "../../context/ChatContext";
+import { useAuth } from "../../context/AuthContext";
+import Avatar from "../../assets/Avatar.png";
 
 function ChatHeader({ onOpenMedia }) {
   const { selectedUser } = useChat();

@@ -1,4 +1,4 @@
-import Loader from "./components/Loader";
+import Loader from "./components/sidebar/Loader";
 import { useAuth } from "./context/AuthContext";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Landing from "./pages/Landing";

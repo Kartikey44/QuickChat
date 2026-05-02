@@ -1,33 +1,51 @@
 import React, { useState, useEffect } from "react";
-import Avatar from "../assets/Avatar.png";
+import Avatar from "../../assets/Avatar.png";
 import { RiArrowRightLongLine } from "react-icons/ri";
 import { GiCrossMark } from "react-icons/gi";
 import { FaPencilAlt } from "react-icons/fa";
-import axiosInstance from "../lib/axios";
-import toast from 'react-hot-toast'
+import axiosInstance from "../../lib/axios";
+import { useData } from "../../context/DataContext";
+import { useAuth } from "../../context/AuthContext";
+import toast from "react-hot-toast";
 
-function ProfileOverlay({ user, onClose, onUpdate }) {
-  const [name, setName] = useState(user.name );
+function ProfileOverlay() {
+  const { showProfile, setShowProfile } = useData();
+  const { authUser, setAuthUser, logout } = useAuth();
+  const user = authUser;
+  const [name, setName] = useState(user.name);
   const [tempName, setTempName] = useState(user.name);
   const [isEditingName, setIsEditingName] = useState(false);
-
   const [bio, setBio] = useState(user.bio);
   const [tempBio, setTempBio] = useState(user.bio);
   const [isEditingBio, setIsEditingBio] = useState(false);
-
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(user.profileimg);
-
   const [loading, setLoading] = useState(false);
-
+  useEffect(() => {
+    if (user) {
+      setName(user.name || "");
+      setTempName(user.name || "");
+      setBio(user.bio || "");
+      setTempBio(user.bio || "");
+      setPreview(user.profileimg || "");
+    }
+  }, [user]);
+  const onUpdate = (updatedData) => {
+    setAuthUser((prev) => ({
+      ...prev,
+      bio: updatedData.bio ?? prev.bio,
+      name: updatedData.name ?? prev.name,
+      profileimg: updatedData.profileimg ?? prev.profileimg,
+    }));
+  };
   const handleEditName = () => {
     setTempName(name);
     setIsEditingName(true);
   };
 
   const handleSaveName = () => {
-    if (tempName.length < 3) {
-      toast.error("Name must have at least 3 characters.")
+    if (tempName.trim().length < 3) {
+      toast.error("Name must have at least 3 characters.");
       return;
     }
     setName(tempName);
@@ -67,13 +85,11 @@ function ProfileOverlay({ user, onClose, onUpdate }) {
       if (preview) URL.revokeObjectURL(preview);
     };
   }, [preview]);
-
   const handleSubmit = async () => {
     try {
       setLoading(true);
 
       const formData = new FormData();
-
       if (name) formData.append("name", name);
       if (bio) formData.append("bio", bio);
       if (image) formData.append("image", image);
@@ -81,16 +97,18 @@ function ProfileOverlay({ user, onClose, onUpdate }) {
       const res = await axiosInstance.post("/upload", formData, {
         withCredentials: true,
       });
-
-      onUpdate(res.data);
-      onClose();
+      console.log("API Response:", res.data);
+      const updatedUser = res.data.user || res.data;
+      onUpdate(updatedUser);
+      toast.success("Profile updated successfully");
+      setShowProfile(false);
     } catch (err) {
       console.error(err.response?.data || err.message);
+      toast.error(err.response?.data?.message || "Update failed");
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-[#1f1f1f] p-6 w-full h-full flex flex-col gap-6">
@@ -185,7 +203,7 @@ function ProfileOverlay({ user, onClose, onUpdate }) {
 
         <div className="absolute left-5 bottom-5 right-5 gap-50 flex justify-between p-5">
           <div
-            onClick={onClose}
+            onClick={() => setShowProfile(false)}
             className="border p-2 w-20 text-white/80 text-center hover:border-0 hover:bg-red-500/50 cursor-pointer rounded-lg"
           >
             Cancel

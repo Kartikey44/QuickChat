@@ -1,23 +1,24 @@
 import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
 import { uploadChatImage } from "../middleware/upload.middleware.js";
+
 import {
   sendMessage,
   getMessageByUserId,
-  getChatPartners,
   markMessagesAsRead,
-  getAllContacts
+  getContactsData
 } from "../controllers/message.controller.js";
 
 const router = express.Router();
-router.get("/all-contacts", protectRoute, getAllContacts);
-router.get("/contacts", protectRoute, getChatPartners);
+
+router.get("/contacts-data", protectRoute, getContactsData);
+
 router.get("/:id", protectRoute, getMessageByUserId);
 
 router.post(
   "/send",
   protectRoute,
-  uploadChatImage.single("image"), 
+  uploadChatImage.single("image"),
   sendMessage
 );
 

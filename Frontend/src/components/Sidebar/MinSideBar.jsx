@@ -3,11 +3,12 @@ import { IoMdSettings } from "react-icons/io";
 import { CgProfile } from "react-icons/cg";
 import { LuLogOut } from "react-icons/lu";
 import { BiMessageSquare } from "react-icons/bi";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
+import { useData } from "../../context/DataContext";
 
-function MinSideBar({ setShowProfile }) {
-  const { logout,authUser } = useAuth();
-
+function MinSideBar() {
+  const { logout, authUser } = useAuth();
+  const { setShowProfile, setShowContacts } = useData();
   return (
     <div className="hidden md:flex flex-col justify-between h-full py-6 bg-[#1d1f1f] shadow-2xl items-center">
       <div>
@@ -16,6 +17,7 @@ function MinSideBar({ setShowProfile }) {
           className="text-white cursor-pointer"
           onClick={() => {
             setShowProfile(false);
+            setShowContacts(false);
           }}
         />
       </div>

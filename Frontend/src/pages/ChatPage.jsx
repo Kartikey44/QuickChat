@@ -1,23 +1,23 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
-import UnreadChats from '../components/UnreadChats'
+import UnreadChats from "../components/Chat/UnreadChats.jsx";
 import AllChats from "../components/AllChats";
-import ProfileOverlay from "../components/ProfileOverlay";
-import ChatContainer from "../components/ChatContainer";
-import NoChatContainer from "../components/NoChatContainer";
-import ProfileHeader from "../components/ProfileHeader";
+import ProfileOverlay from "../components/Sidebar/ProfileOverlay";
+import ChatContainer from "../components/Chat/ChatContainer.jsx";
+import NoChatContainer from "../components/Chat/NoChatContainer.jsx";
+import ProfileHeader from "../components/Sidebar/ProfileHeader.jsx";
 import { useChat } from "../context/ChatContext";
-import MinSideBar from "../components/MinSideBar";
-import ActiveTabSwitch from "../components/ActiveTabSwitch";
-import SideBar from "../components/SideBar";
-
+import MinSideBar from "../components/Sidebar/MinSideBar";
+import ActiveTabSwitch from "../components/Sidebar/ActiveTabSwitch";
+import SideBar from "../components/Sidebar/SideBar";
+import { useData } from "../context/DataContext.jsx";
 export default function ChatPage() {
-  const [showProfile, setShowProfile] = useState(false);
+  const { showProfile, setShowProfile } = useData();
 
   const { logout, authUser, setAuthUser } = useAuth();
   const navigate = useNavigate();
-  const { selectedUser,activeTab } = useChat();
+  const { selectedUser, activeTab } = useChat();
 
   const handleLogout = async () => {
     try {
@@ -33,7 +33,7 @@ export default function ChatPage() {
     <div className="h-screen w-full bg-[#161717] text-white flex overflow-hidden">
       {/* MinSidebar */}
       <div className=" hidden md:flex flex-col w-15 border-r border-[#343636]">
-        <MinSideBar setShowProfile={setShowProfile} />
+        <MinSideBar />
       </div>
 
       <div className="flex flex-1">
@@ -44,13 +44,6 @@ export default function ChatPage() {
           {selectedUser ? <ChatContainer /> : <NoChatContainer />}
         </div>
       </div>
-      {showProfile && (
-        <ProfileOverlay
-          user={authUser}
-          onClose={() => setShowProfile(false)}
-          onUpdate={setAuthUser}
-        />
-      )}
     </div>
   );
 }

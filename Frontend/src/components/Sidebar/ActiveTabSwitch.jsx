@@ -1,12 +1,11 @@
-import React from 'react'
-import { useChat } from '../context/ChatContext'
+import React from "react";
+import { useChat } from "../../context/ChatContext";
 
 function ActiveTabSwitch() {
-  const { activeTab, setActiveTab } = useChat()
+  const { activeTab, setActiveTab } = useChat();
 
   return (
-    <div className='flex gap-4 px-4 text-center text-white'>
-      
+    <div className="flex gap-4 px-4 text-center text-white">
       <span
         onClick={() => setActiveTab("all")}
         className={`cursor-pointer border border-white/10 rounded-full text-sm px-4 ${
@@ -25,7 +24,7 @@ function ActiveTabSwitch() {
         Unread
       </span>
     </div>
-  )
+  );
 }
 
-export default ActiveTabSwitch
+export default ActiveTabSwitch;

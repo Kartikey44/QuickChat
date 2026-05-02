@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useRef } from "react";
-import { useChat } from "../context/ChatContext";
-import { useAuth } from "../context/AuthContext";
-import ChatSender from "./ChatSender";
-import ChatHeader from "./ChatHeader";
+import { useChat } from "../../context/ChatContext";
+import { useAuth } from "../../context/AuthContext";
+import ChatSender from "../Chat/ChatSender";
+import ChatHeader from "../Chat/ChatHeader";
 
 function ChatContainer() {
   const { selectedUser, getMessages, messages } = useChat();
