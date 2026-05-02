@@ -26,8 +26,6 @@ function ProfileHeader() {
           />
         </div>
       </div>
-      <SearchBar />
-      <ActiveTabSwitch />
     </div>
   );
 }

@@ -5,24 +5,57 @@ import ProfileOverlay from "../Sidebar/ProfileOverlay";
 import ContactOverlay from "../Contact/ContactOverlay";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
-import ProfileHeader from "../Sidebar/ProfileHeader";
 import { useData } from "../../context/DataContext";
+import ProfileHeader from "../Sidebar/ProfileHeader";
+import ChatSearchBar from "../Chat/ChatSearchBar";
+import ActiveTabSwitch from "./ActiveTabSwitch";
+
 function SideBar() {
-  const { showProfile, setShowProfile, showContacts } = useData();
+  const { showProfile, setShowProfile, showContacts, setShowContacts } = useData();
   const { activeTab } = useChat();
-  const { logout, authUser, setAuthUser } = useAuth();
+  const { authUser } = useAuth();
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // normalize search (prevents repeated .toLowerCase() in children)
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
   return (
-    <div className="w-full md:w-100 border-r border-[#343636] flex flex-col relative">
-      <div className="p-4">
+    <div className="w-full md:w-100 border-r border-[#343636] flex flex-col relative bg-[#111]">
+
+      {/* 🔹 Header (Sticky) */}
+      <div className="p-4 sticky top-0 z-10 bg-[#111]">
         <ProfileHeader />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2">
-        {activeTab === "all" ? <ChatPartners /> : <UnreadChats />}
+      {/* 🔹 Search + Tabs */}
+      <div className="flex flex-col gap-4 px-3 py-2">
+        <ChatSearchBar onSearch={setSearchQuery} />
+        <ActiveTabSwitch />
       </div>
-      {showProfile && <ProfileOverlay />}
-      {showContacts && <ContactOverlay />}
+
+      {/* 🔹 Chat List */}
+      <div className="flex-1 overflow-y-auto px-2">
+        {activeTab === "all" ? (
+          <ChatPartners searchQuery={normalizedQuery} />
+        ) : (
+          <UnreadChats searchQuery={normalizedQuery} />
+        )}
+      </div>
+
+      {/* 🔹 Overlays */}
+      {showProfile && (
+        <ProfileOverlay
+          user={authUser}
+          onClose={() => setShowProfile(false)}
+        />
+      )}
+
+      {showContacts && (
+        <ContactOverlay
+          onClose={() => setShowContacts(false)}
+        />
+      )}
     </div>
   );
 }

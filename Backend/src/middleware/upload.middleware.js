@@ -7,17 +7,22 @@ const chatStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "chat_images",
-    allowed_formats: ["jpg", "png", "jpeg"],
+    allowed_formats: ["jpg", "png", "jpeg",
+      //documents
+    "pdf", "txt",
+    "doc", "docx",
+    "xls", "xlsx",
+    "ppt", "pptx",
+    "zip"],
   },
 });
 
 export const uploadChatImage = multer({ storage: chatStorage });
-
-// Profile images
 const profileStorage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "profile_images",
+     resource_type: "auto",
     allowed_formats: ["jpg", "png", "jpeg"],
   },
 });
