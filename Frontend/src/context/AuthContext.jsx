@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }) => {
   const [loggingIn, setLoggingIn] = useState(false);
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
-  
 
   const checkAuth = async () => {
     try {
@@ -28,7 +27,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const connectSocket = (user) => {
-    if (!user || socket?.connected) return;
+    if (!user) return;
+
+    if (socket) {
+      socket.disconnect();
+    }
 
     const newSocket = io(BASE_URL, {
       withCredentials: true,
@@ -36,11 +39,15 @@ export const AuthProvider = ({ children }) => {
     });
 
     newSocket.on("connect", () => {
-      console.log("Socket connected");
+      console.log("Socket connected:", newSocket.id);
     });
 
     newSocket.on("getOnlineUsers", (users) => {
       setOnlineUsers(users);
+    });
+
+    newSocket.on("disconnect", () => {
+      console.log("Socket disconnected");
     });
 
     setSocket(newSocket);
@@ -50,6 +57,7 @@ export const AuthProvider = ({ children }) => {
     if (socket) {
       socket.disconnect();
       setSocket(null);
+      setOnlineUsers([]);
     }
   };
 
@@ -58,7 +66,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await axiosInstance.post("/auth/signup", userData);
       setAuthUser(res.data);
-      connectSocket(res.data);
       toast.success("Account created successfully!");
       return res.data;
     } finally {
@@ -71,7 +78,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await axiosInstance.post("/auth/login", userData);
       setAuthUser(res.data);
-      connectSocket(res.data);
       toast.success("Logged in successfully!");
       return res.data;
     } finally {
@@ -83,7 +89,6 @@ export const AuthProvider = ({ children }) => {
     try {
       await axiosInstance.post("/auth/logout");
       setAuthUser(null);
-      disconnectSocket();
       toast.success("Logged out successfully");
     } catch {}
   };
@@ -93,10 +98,17 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (!authUser) disconnectSocket();
+    if (authUser) {
+      connectSocket(authUser);
+    } else {
+      disconnectSocket();
+    }
+
+    return () => {
+      if (socket) socket.disconnect();
+    };
   }, [authUser]);
 
- 
   return (
     <AuthContext.Provider
       value={{

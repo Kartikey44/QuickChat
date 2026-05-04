@@ -1,3 +1,4 @@
+import { getReceiverSocketId, io } from "../lib/socketio.js";
 import Message from "../model/message.model.js";
 import User from "../model/user.model.js";
 import dotenv from "dotenv";
@@ -89,6 +90,10 @@ export const sendMessage = async (req, res) => {
     console.log("req.body:", req.body)
     console.log("req.file:",req.file)
     await newMessage.save();
+    const receiverSocketId = getReceiverSocketId(receiverId)
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
     res.status(200).json(newMessage); 
   } catch (error) {
     console.log("Error in sending message", error);

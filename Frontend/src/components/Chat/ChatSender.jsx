@@ -2,22 +2,27 @@ import React, { useState, useRef, useEffect } from "react";
 import { MdOutlinePermMedia } from "react-icons/md";
 import { BsFillSendFill } from "react-icons/bs";
 import { useChat } from "../../context/ChatContext";
+import { useAuth } from "../../context/AuthContext";
 
 function ChatSender() {
   const [tempMessage, setTempMessage] = useState("");
   const [file, setFile] = useState(null);
   const [isChatting, setIsChatting] = useState(false);
   const [preview, setPreview] = useState(null);
+
   const containerRef = useRef(null);
+  const typingRef = useRef(null);
 
   const { selectedUser, sendMessage } = useChat();
+  const { socket } = useAuth(); 
+
   const handleSend = async () => {
     if (!tempMessage.trim() && !file) return;
 
     await sendMessage({
       content: tempMessage,
       receiverId: selectedUser._id,
-      image: file,
+      file,
     });
 
     setTempMessage("");
@@ -25,11 +30,24 @@ function ChatSender() {
     setPreview(null);
   };
 
+  const handleTyping = () => {
+    if (!selectedUser || !socket) return;
+
+    socket.emit("typing", { receiverId: selectedUser._id });
+
+    if (typingRef.current) clearTimeout(typingRef.current);
+
+    typingRef.current = setTimeout(() => {
+      socket.emit("stopTyping", { receiverId: selectedUser._id });
+    }, 800);
+  };
+
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview);
     };
   }, [preview]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -53,12 +71,15 @@ function ChatSender() {
     >
       <input
         type="text"
+        value={tempMessage}
         onClick={() => setIsChatting(true)}
+        onChange={(e) => {
+          setTempMessage(e.target.value);
+          handleTyping(); 
+        }}
         onKeyDown={(e) => {
           if (e.key === "Enter") handleSend();
         }}
-        value={tempMessage}
-        onChange={(e) => setTempMessage(e.target.value)}
         placeholder="Type a message"
         className="h-full w-full text-base bg-transparent outline-none px-4"
       />
@@ -78,20 +99,20 @@ function ChatSender() {
 
               if (selectedFile) {
                 setFile(selectedFile);
-                setPreview(URL.createObjectURL(selectedFile)); // 🔥 preview URL
-                setIsChatting(true); // show send button
+                setPreview(URL.createObjectURL(selectedFile));
+                setIsChatting(true);
               }
             }}
           />
         </label>
+
         {preview && (
-          <div className=" fixed top-18 right-0 w-130 h-140 bg-gray-800 p-2 rounded-lg shadow-lg">
+          <div className="fixed top-18 right-0 w-130 h-140 bg-gray-800 p-2 rounded-lg shadow-lg">
             <img
               src={preview}
               alt="preview"
               className="w-full h-full p-10 object-cover rounded"
             />
-
             <button
               onClick={() => {
                 setFile(null);
@@ -103,6 +124,7 @@ function ChatSender() {
             </button>
           </div>
         )}
+
         {(isChatting || file) && (
           <button
             className="bg-cyan-500 rounded-full p-2 cursor-pointer"
