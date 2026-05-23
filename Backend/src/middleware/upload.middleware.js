@@ -1,6 +1,6 @@
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import cloudinary from "../lib/cloundinary.js";
+import cloudinary from "../config/cloudinary.js";
 
 // Chat images
 const chatStorage = new CloudinaryStorage({

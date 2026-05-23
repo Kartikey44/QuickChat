@@ -21,8 +21,8 @@ function ContactOverlay() {
       .sort((a, b) => a.name.localeCompare(b.name)); 
   }, [q, chats]);
 
-  return (
-    <div className="absolute inset-0 bg-[#161717] flex items-center justify-center z-50">
+  return ( 
+    <div className="absolute inset-0 bg-linear-to-br from-[#3d0202] to-[#1b0000] flex items-center justify-center z-50">
       <div className="p-6 w-full h-full flex flex-col gap-6">
         <div className="flex flex-col gap-5">
           <p className="text-3xl font-bold bg-gradient-to-r from-[#0f7ee8] via-[#8c288d] to-[#d20a70] bg-clip-text text-transparent ">
@@ -38,7 +38,7 @@ function ContactOverlay() {
                 <div
                   key={user._id}
                   onClick={() => selectUser(user)}
-                  className="flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer hover:bg-cyan-500/10 transition"
+                  className="flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer hover:bg-[#5e0404] transition"
                 >
                   <img
                     src={user.profileimg || Avatar}

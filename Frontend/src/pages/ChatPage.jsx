@@ -23,14 +23,14 @@ export default function ChatPage() {
     try {
       console.log("API URL:", import.meta.env.VITE_API_URL);
       await logout();
-      navigate("/login");
+      navigate("/");
     } catch {
       console.log("Logout failed");
     }
   };
 
   return (
-    <div className="h-screen w-full bg-[#161717] text-white flex overflow-hidden">
+    <div className="h-screen w-full bg-linear-to-br from-[#de3c62] via-[#4a0322] to-[#730505] text-white flex overflow-hidden">
       {/* MinSidebar */}
       <div className=" hidden md:flex flex-col w-15 border-r border-[#343636]">
         <MinSideBar />

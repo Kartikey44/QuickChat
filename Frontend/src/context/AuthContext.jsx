@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+
 import axiosInstance from "../lib/axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
@@ -9,17 +10,23 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [authUser, setAuthUser] = useState(null);
+
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
   const [signingUp, setSigningUp] = useState(false);
+
   const [loggingIn, setLoggingIn] = useState(false);
+
   const [socket, setSocket] = useState(null);
+
   const [onlineUsers, setOnlineUsers] = useState([]);
 
   const checkAuth = async () => {
     try {
       const res = await axiosInstance.get("/auth/check");
-      setAuthUser(res.data);
-    } catch {
+
+      setAuthUser(res.data.user);
+    } catch (error) {
       setAuthUser(null);
     } finally {
       setIsCheckingAuth(false);
@@ -29,17 +36,18 @@ export const AuthProvider = ({ children }) => {
   const connectSocket = (user) => {
     if (!user) return;
 
-    if (socket) {
-      socket.disconnect();
-    }
+    if (socket?.connected) return;
 
     const newSocket = io(BASE_URL, {
       withCredentials: true,
-      transports: ["websocket"],
+
+      query: {
+        userId: user.id,
+      },
     });
 
     newSocket.on("connect", () => {
-      console.log("Socket connected:", newSocket.id);
+      console.log("Socket Connected:", newSocket.id);
     });
 
     newSocket.on("getOnlineUsers", (users) => {
@@ -47,11 +55,12 @@ export const AuthProvider = ({ children }) => {
     });
 
     newSocket.on("disconnect", () => {
-      console.log("Socket disconnected");
+      console.log("Socket Disconnected");
     });
 
     setSocket(newSocket);
   };
+
 
   const disconnectSocket = () => {
     if (socket) {
@@ -61,25 +70,37 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+
   const signup = async (userData) => {
     setSigningUp(true);
+
     try {
       const res = await axiosInstance.post("/auth/signup", userData);
-      setAuthUser(res.data);
+
+      setAuthUser(res.data.user);
+
       toast.success("Account created successfully!");
+
       return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Signup failed");
     } finally {
       setSigningUp(false);
     }
   };
-
   const login = async (userData) => {
     setLoggingIn(true);
+
     try {
-      const res = await axiosInstance.post("/auth/login", userData);
-      setAuthUser(res.data);
+      const res = await axiosInstance.post("/auth/", userData);
+
+      setAuthUser(res.data.user);
+
       toast.success("Logged in successfully!");
+
       return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Login failed");
     } finally {
       setLoggingIn(false);
     }
@@ -88,10 +109,18 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await axiosInstance.post("/auth/logout");
+
+      disconnectSocket();
+
       setAuthUser(null);
+
       toast.success("Logged out successfully");
-    } catch {}
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Logout failed");
+    }
   };
+
+
 
   useEffect(() => {
     checkAuth();
@@ -103,10 +132,6 @@ export const AuthProvider = ({ children }) => {
     } else {
       disconnectSocket();
     }
-
-    return () => {
-      if (socket) socket.disconnect();
-    };
   }, [authUser]);
 
   return (
@@ -117,11 +142,11 @@ export const AuthProvider = ({ children }) => {
         signup,
         logout,
         loggingIn,
-        setAuthUser,
         signingUp,
         isCheckingAuth,
         onlineUsers,
         socket,
+        setAuthUser,
       }}
     >
       {children}

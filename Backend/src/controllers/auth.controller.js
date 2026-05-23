@@ -1,28 +1,28 @@
-import User from "../model/user.model.js";
+import User from "../models/user.model.js";
 import dotenv from "dotenv";
-import { sendWelcomeEmail } from "../email/emailHandlers.js";
-import cloudinary from "../lib/cloundinary.js";
+import cloudinary from "../config/cloudinary.js";
 
 dotenv.config();
 export const signup = async (req, res) => {
-  const { name, email, password } = req.body;
-
   try {
-    if (!name || !email || !password) {
+    const { name, email, password, mobile } = req.body;
+
+    if (!name || !email || !password || !mobile) {
       return res.status(400).json({
-        message: "All fields are required!",
         success: false,
+        message: "All fields are required",
       });
     }
 
     if (name.trim().length < 3) {
       return res.status(400).json({
-        message: "Name must be at least 3 characters",
         success: false,
+        message: "Name must be at least 3 characters",
       });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!emailRegex.test(email)) {
       return res.status(400).json({
         success: false,
@@ -30,6 +30,15 @@ export const signup = async (req, res) => {
       });
     }
 
+    // Mobile validation
+    const mobileRegex = /^[6-9]\d{9}$/;
+
+    if (!mobileRegex.test(mobile)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid mobile number",
+      });
+    }
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
@@ -37,95 +46,45 @@ export const signup = async (req, res) => {
       });
     }
 
-    const strongPassword = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$/;
+    const strongPassword =
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$/;
+
     if (!strongPassword.test(password)) {
       return res.status(400).json({
         success: false,
-        message: "Password must contain uppercase, lowercase and a number",
+        message:
+          "Password must contain uppercase, lowercase and number",
       });
     }
 
     const existingUser = await User.findOne({
-      email: email.toLowerCase(),
-    }).select("_id");
+      $or: [
+        { email: email.toLowerCase() },
+        { mobile },
+      ],
+    });
 
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists",
+        message:
+          existingUser.email === email.toLowerCase()
+            ? "Email already registered"
+            : "Mobile number already registered",
       });
     }
 
-    const hashedPassword = await User.hashPassword(password);
+    const hashedPassword =
+      await User.hashPassword(password);
+
+
 
     const user = await User.create({
       name: name.trim(),
       email: email.toLowerCase(),
+      mobile,
       password: hashedPassword,
     });
-
-    const token = user.generateAuthToken();
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-    });
-    res.status(201).json({
-      success: true,
-      message: "Signup successful",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        profileimg: user.profileimg,
-        bio: user.bio,
-      },
-    });
-
-    sendWelcomeEmail(user.email, user.name, process.env.CLIENT_URL)
-      .then(() => console.log("Email sent"))
-      .catch((err) => console.log("Email failed:", err.message));
-  } catch (error) {
-    console.error("SIGNUP ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-export const login = async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    if (!email || !password) {
-      return res.status(400).json({
-        message: "All fields are required!",
-        success: false,
-      });
-    }
-
-    const user = await User.findOne({
-      email: email.toLowerCase(),
-    }).select("+password");
-
-    if (!user) {
-      return res.status(401).json({
-        message: "Invalid Credentials",
-        success: false,
-      });
-    }
-
-    const isPasswordCorrect = await user.comparePassword(password);
-
-    if (!isPasswordCorrect) {
-      return res.status(401).json({
-        message: "Invalid Credentials",
-        success: false,
-      });
-    }
-
     const token = user.generateAuthToken();
 
     res.cookie("token", token, {
@@ -142,6 +101,7 @@ export const login = async (req, res) => {
         email: user.email,
         profileimg: user.profileimg,
         bio: user.bio,
+        mobile: user.mobile,
       },
     });
   } catch (err) {
@@ -152,7 +112,81 @@ export const login = async (req, res) => {
     });
   }
 };
+export const login = async (req, res) => {
+  try {
+    const { identifier, password } = req.body;
 
+    if (!identifier || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    // Detect Email or Mobile
+
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const isEmail =
+      emailRegex.test(identifier);
+
+    const query = isEmail
+      ? { email: identifier.toLowerCase() }
+      : { mobile: identifier };
+
+    // Find User
+
+    const user = await User.findOne(query)
+      .select("+password");
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    // Compare Password
+
+    const isPasswordCorrect =
+      await user.comparePassword(password);
+
+    if (!isPasswordCorrect) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    // Generate Token
+
+    const token = user.generateAuthToken();
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        profileimg: user.profileimg,
+        bio: user.bio,
+        mobile: user.mobile,
+      },
+    });
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
 export const logout = (req, res) => {
   try {
     res.clearCookie("token", {
@@ -174,27 +208,99 @@ export const logout = (req, res) => {
   }
 };
 
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (
+  req,
+  res
+) => {
   try {
-    const { profileimg } = req.body;
-
-    if (!profileimg) {
-      return res.status(400).json({ message: "profileimg is required" });
-    }
+    const { name, bio, mobile, profileimg } =
+      req.body;
 
     const userId = req.user._id;
 
-    const uploadResponse = await cloudinary.uploader.upload(profileimg);
+    const updatedData = {};
 
-    const updateUser = await User.findByIdAndUpdate(
-      userId,
-      { profileimg: uploadResponse.secure_url },
-      { new: true },
+    // Update name
+    if (name) {
+      updatedData.name = name.trim();
+    }
+
+    // Update bio
+    if (bio) {
+      updatedData.bio = bio.trim();
+    }
+
+    // Update mobile
+    if (mobile) {
+      const mobileRegex = /^[6-9]\d{9}$/;
+
+      if (!mobileRegex.test(mobile)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid mobile number",
+        });
+      }
+
+      // Check duplicate mobile
+      const existingMobile =
+        await User.findOne({
+          mobile,
+          _id: { $ne: userId },
+        });
+
+      if (existingMobile) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Mobile number already in use",
+        });
+      }
+
+      updatedData.mobile = mobile;
+    }
+    if (profileimg) {
+      const uploadResponse =
+        await cloudinary.uploader.upload(
+          profileimg
+        );
+
+      updatedData.profileimg =
+        uploadResponse.secure_url;
+    }
+
+    // Update User
+
+    const updatedUser =
+      await User.findByIdAndUpdate(
+        userId,
+        updatedData,
+        {
+          new: true,
+        }
+      );
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        mobile: updatedUser.mobile,
+        profileimg:
+          updatedUser.profileimg,
+        bio: updatedUser.bio,
+      },
+    });
+  } catch (error) {
+    console.log(
+      "PROFILE UPDATE ERROR:",
+      error
     );
 
-    res.status(201).json(updateUser);
-  } catch (error) {
-    console.log("Error on updation of profile", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };

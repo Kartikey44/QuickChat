@@ -14,7 +14,7 @@ function ProfileHeader() {
   return (
     <div className="w-full flex flex-col gap-4">
       <div className="flex justify-between px-1 relative">
-        <p className="text-3xl font-bold bg-gradient-to-r from-[#0f7ee8] via-[#8c288d] to-[#d20a70] bg-clip-text text-transparent">
+        <p className="text-3xl font-bold bg-linear-to-r from-[#0f7ee8] via-[#8c288d] to-[#d20a70] bg-clip-text text-transparent">
           QuickChat
         </p>
 

@@ -18,7 +18,7 @@ function AllChats() {
       {allChats.map((chat) => (
         <div
           key={chat._id}
-          className="px-4 py-2 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
+          className="px-4 py-2 rounded-lg cursor-pointer hover:bg-[#570707] transition-colors"
           onClick={() => selectUser(chat)}
         >
           <div className="flex items-center gap-5">

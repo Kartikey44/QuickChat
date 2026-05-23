@@ -28,7 +28,7 @@ function ChatContainer() {
         <ChatHeader onOpenMedia={() => setShowMedia(true)} />
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar px-4 bg-[#121212] py-2 space-y-3">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-4 bg-linear-to-br from-[#2e0c14] via-[#1a010b] to-[#170000] py-2 space-y-3">
         {Array.isArray(messages) &&
           messages.map((msg) => {
             const isSender =
@@ -37,26 +37,19 @@ function ChatContainer() {
             return (
               <div
                 key={msg._id}
-                className={`flex ${isSender ? "justify-end" : "justify-start"}`}
+                className={`flex ${isSender ? "justify-start" : "justify-end"}`}
               >
                 <div
                   className={`relative max-w-xs px-3 py-2 text-white rounded-2xl ${
                     isSender
-                      ? "bg-green-600 rounded-br-none"
-                      : "bg-gray-700 rounded-bl-none"
+                      ? "bg-[#04354e] rounded-bl-none"
+                      : "bg-[#ce0707] rounded-br-none"
                   }`}
                 >
-                  <div
-                    className={`absolute bottom-0 w-3 h-3 rotate-45 ${
-                      isSender
-                        ? "right-[-6px] bg-green-600"
-                        : "left-[-6px] bg-gray-700"
-                    }`}
-                  />
 
                   {msg.content && (
                     <div className="flex gap-2 items-end">
-                      <p className="break-words">{msg.content}</p>
+                      <p className="wrap-break-words">{msg.content}</p>
                       <p className="text-[10px] text-gray-300">
                         {new Date(msg.createdAt).toLocaleTimeString([], {
                           hour: "2-digit",
@@ -73,7 +66,7 @@ function ChatContainer() {
                         alt="media"
                         className="rounded-lg max-w-40 object-cover"
                       />
-                      <p className="absolute bottom-1 right-2 text-[10px] text-white bg-black/50 px-1 rounded">
+                      <p className="absolute bottom-1 right-2 text-[10px] text-white  px-1 rounded">
                         {new Date(msg.createdAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -92,7 +85,7 @@ function ChatContainer() {
       </div>
 
       <div className="h-20">
-        <div className="bg-[#1b1c1c] px-3 py-3 shadow-2xl h-full flex items-center">
+        <div className="px-3 bg-lineart-to-br from-[#0f0000] to-[#3a0105] py-3 shadow-2xl h-full flex items-center">
           <ChatSender />
         </div>
       </div>

@@ -1,18 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import Logo from "../assets/Logo.png";
-import BorderAnimated from "../components/BorderAnimated";
+import toast from "react-hot-toast";
 import { signupFields } from "../assets/data";
+import axiosInstance from "../lib/axios";
 import { useNavigate } from "react-router-dom";
+
 function Signup() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
+    mobile: "",
   });
 
   const { signup, signingUp } = useAuth();
+
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -20,134 +27,145 @@ function Signup() {
     });
   };
 
+  const validateForm = () => {
+    if (formData.name.trim().length < 3) {
+      toast.error("Name must be at least 3 characters");
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Invalid email format");
+      return false;
+    }
+
+    if (formData.password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return false;
+    }
+
+    const strongPassword = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).+$/;
+
+    if (!strongPassword.test(formData.password)) {
+      toast.error("Password must contain uppercase, lowercase and number");
+      return false;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return false;
+    }
+
+    if (formData.mobile && !/^[6-9]\d{9}$/.test(formData.mobile)) {
+      toast.error("Invalid mobile number");
+      return false;
+    }
+
+    return true;
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.password.length < 6) {
-      return alert("Password must be at least 6 characters");
-    }
+    if (!validateForm()) return;
 
     try {
       await signup(formData);
-      navigate("/chat");
-    } catch (error) {
-      console.log("Error in signup:", error.response?.data || error.message);
-    }
 
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-    });
+      toast.success("Signup successful");
+
+      navigate("/chat");
+
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        mobile: "",
+      });
+    } catch (error) {
+      console.log("Signup Error:", error.response?.data || error.message);
+
+      toast.error(error.response?.data?.message || "Signup failed");
+    }
   };
 
   return (
-    <div className="h-screen flex justify-center items-center px-4 backdrop-blur-lg bg-linear-to-br from-[#2c2f33] to-[#1e2124]">
-      <div className="w-full md:max-w-4xl md:h-[90%]  max-w-2xl md:py-2">
-        <BorderAnimated>
-          <div className="flex flex-col md:h-full md:flex-row w-full ">
-            <form
-              onSubmit={handleSubmit}
-              className="px-6 py-3 md:w-1/2 text-white flex flex-col md:gap-4 gap-2 md:border-r border-white/10"
-            >
-              <div className="text-center flex flex-col gap-1 md:gap-2 items-center">
-                <img src={Logo} alt="logo" className="h-24 w-24" />
-                <div>
-                  <h2 className="text-2xl font-bold">Create Account</h2>
-                  <p className="text-sm text-gray-400">
-                    Sign up for a new account
-                  </p>
-                </div>
-              </div>
+    <div className="min-h-screen max-w-screen flex justify-center items-center px-4 backdrop-blur-lg bg-linear-to-br from-[#210108] via-[#2e1001] to-[#410302]">
+      <div className="md:max-w-sm w-sm rounded-2xl shadow-2xl md:py-2 bg-linear-to-tr from-[#0f0f0f] via-[#9e041390] to-[#640802] space-y-2">
+        <div className="flex flex-col md:h-full md:flex-row">
+          <form
+            onSubmit={handleSubmit}
+            className="px-6 py-3 w-full text-white flex flex-col md:gap-4 gap-2"
+          >
+            <div className="text-center flex flex-col gap-1 md:gap-2 items-center">
+              <img src={Logo} alt="logo" className="h-10 w-10" />
 
-              {signupFields.map((field) => {
-                const Icon = field.icon;
+              <div>
+                <h2 className="md:text-2xl text-xl font-bold">
+                  Create Account
+                </h2>
 
-                return (
-                  <div
-                    key={field.name}
-                    className="flex flex-col md:gap-1 w-full"
-                  >
-                    <label
-                      htmlFor={field.name}
-                      className="text-sm text-gray-300"
-                    >
-                      {field.label}
-                    </label>
-
-                    <div className="relative">
-                      {Icon && (
-                        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      )}
-
-                      <input
-                        id={field.name}
-                        type={field.type}
-                        name={field.name}
-                        placeholder={field.placeholder}
-                        value={formData[field.name]}
-                        onChange={handleChange}
-                        className="w-full pl-10 md:pr-4 py-2 md:py-2.5 rounded-lg bg-gray-900/80 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-white placeholder-gray-400"
-                        required
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-
-              <button
-                type="submit"
-                disabled={
-                  signingUp ||
-                  !formData.email ||
-                  !formData.password ||
-                  !formData.name
-                }
-                className="bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 transition py-2.5 rounded-lg font-semibold disabled:opacity-50 shadow-lg"
-              >
-                {signingUp ? (
-                  <span className="flex justify-center items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    Creating...
-                  </span>
-                ) : (
-                  "Create Account"
-                )}
-              </button>
-
-              <div className="flex justify-center items-center">
-                <span
-                  onClick={() => navigate("/login")}
-                  className="text-blue-400 hover:text-blue-300 cursor-pointer transition underline"
-                >
-                  Already have an account? Login
-                </span>
-              </div>
-            </form>
-
-            <div className="hidden md:flex flex-col md:w-1/2 gap-2 items-center justify-center p-6">
-              <img
-                src="/signup.png"
-                alt="signup visual"
-                className="max-w-sm w-full object-contain"
-              />
-              <p className="text-2xl text-sky-400 font-bold">
-                connect anytime,anywhere
-              </p>
-              <div className="md:flex flex-row gap-5">
-                <span className="bg-gray-600/70 px-3 rounded-full text-sky-400 ">
-                  Free
-                </span>
-                <span className="bg-gray-600/70 px-3 rounded-full text-sky-400">
-                  Easy setup
-                </span>
-                <span className="bg-gray-600/70 px-3 rounded-full text-sky-400">
-                  private
-                </span>
+                <p className="md:text-sm text-[15px] text-gray-400">
+                  Sign up for a new account
+                </p>
               </div>
             </div>
-          </div>
-        </BorderAnimated>
+
+            {signupFields.map((field) => {
+              if (field.name === "otp" && !otpSent) {
+                return null;
+              }
+
+              const Icon = field.icon;
+
+              return (
+                <div key={field.name} className="flex flex-col gap-1 w-full">
+                  <label className="text-sm flex items-center justify-between text-gray-300">
+                    {field.label}
+
+                    {field.name === "mobile" && (
+                      <p className="text-xs text-gray-500 px-2">(Optional)</p>
+                    )}
+                  </label>
+
+                  <div className="relative">
+                    {Icon && (
+                      <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    )}
+
+                    <input
+                      type={field.type}
+                      name={field.name}
+                      value={formData[field.name] || ""}
+                      onChange={handleChange}
+                      placeholder={field.placeholder}
+                      maxLength={field.maxLength}
+                      className="w-full pl-10 pr-4 py-2.5 rounded-full bg-gray-900/80 border border-gray-700 focus:ring-2 focus:ring-blue-500 text-white outline-none"
+                    />
+                  </div>
+                </div>
+              );
+            })}
+
+            <button
+              type="submit"
+              disabled={signingUp}
+              className="flex w-full items-center justify-center gap-3 rounded-full bg-linear-to-tr from-[#0f0f0f] via-[#140a0b90] to-[#640802] py-2.5 hover:bg-[#fa1c03] focus:border-gray-300 cursor-pointer"
+            >
+              {signingUp ? "Creating..." : "Create Account"}
+            </button>
+
+            <div className="flex justify-center items-center">
+              <span
+                onClick={() => navigate("/")}
+                className="text-gray-400 hover:text-gray-200 cursor-pointer transition"
+              >
+                Already have an account? Login
+              </span>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

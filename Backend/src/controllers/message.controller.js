@@ -1,6 +1,6 @@
-import { getReceiverSocketId, io } from "../lib/socketio.js";
-import Message from "../model/message.model.js";
-import User from "../model/user.model.js";
+import { getReceiverSocketId, io } from "../config/socketio.js";
+import Message from "../models/message.model.js";
+import User from "../models/user.model.js";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 dotenv.config();

@@ -22,18 +22,16 @@ const filteredChats = chatPartners.filter((chat) => {
           onClick={() => selectUser(chat)}
           className={`px-4 py-2 rounded-lg cursor-pointer ${
             selectedUser?._id === chat._id
-              ? "bg-cyan-500/30"
-              : "hover:bg-cyan-500/20"
+              ? "bg-[#ba0d0d] hover:bg-[#650202]"
+              : ""
           }`}
         >
-          <div className="w-full flex items-center gap-3" >
+          <div className="w-full flex items-center gap-3">
             <img
               src={chat.profileimg || Avatar}
               className="w-12 h-12 object-cover rounded-full"
             />
-            <p className="text-white">
-              {chat.name || chat.email}
-            </p>
+            <p className="text-white">{chat.name || chat.email}</p>
           </div>
         </div>
       ))}

@@ -1,5 +1,5 @@
-import { server } from "./lib/socketio.js";
-import connecttodb from "./lib/db.js";
+import { server } from "./config/socketio.js";
+import connecttodb from "./config/db.js";
 import dotenv from "dotenv";
 
 dotenv.config();

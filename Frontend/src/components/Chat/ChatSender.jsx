@@ -67,7 +67,7 @@ function ChatSender() {
   return (
     <div
       ref={containerRef}
-      className="flex px-5 h-full w-full rounded-full shadow-2xl justify-between items-center bg-transparent border border-x-0 border-y-white/20"
+      className="flex px-5 h-full w-full rounded-full shadow-2xl justify-between items-center border border-x-0 border-y-white/20"
     >
       <input
         type="text"

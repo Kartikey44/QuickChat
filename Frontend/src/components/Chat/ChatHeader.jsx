@@ -12,7 +12,7 @@ function ChatHeader({ onOpenMedia }) {
   return (
     <div
       onClick={onOpenMedia}
-      className="flex items-center justify-between w-full px-5 py-3 border border-y-white/20 border-x-0 bg-[#161717] cursor-pointer"
+      className="flex items-center justify-between w-full px-5 py-3 border border-y-white/20 border-x-0 bg-linear-to-br from-[#170c0c] via-[#11070b] to-[#210202] cursor-pointer"
     >
       <div className="flex items-center gap-4">
         <div className="relative">

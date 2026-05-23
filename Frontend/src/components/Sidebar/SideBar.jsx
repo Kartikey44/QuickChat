@@ -21,10 +21,9 @@ function SideBar() {
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
   return (
-    <div className="w-full md:w-100 border-r border-[#343636] flex flex-col relative bg-[#111]">
-
+    <div className="w-full md:w-100 border-r border-[#343636] flex flex-col relative bg-linear-to-br from-[#1a0114] via-[#4a0322] to-[#240101]">
       {/* 🔹 Header (Sticky) */}
-      <div className="p-4 sticky top-0 z-10 bg-[#111]">
+      <div className="p-4 sticky top-0 z-10 ">
         <ProfileHeader />
       </div>
 
@@ -45,16 +44,11 @@ function SideBar() {
 
       {/* 🔹 Overlays */}
       {showProfile && (
-        <ProfileOverlay
-          user={authUser}
-          onClose={() => setShowProfile(false)}
-        />
+        <ProfileOverlay user={authUser} onClose={() => setShowProfile(false)} />
       )}
 
       {showContacts && (
-        <ContactOverlay
-          onClose={() => setShowContacts(false)}
-        />
+        <ContactOverlay onClose={() => setShowContacts(false)} />
       )}
     </div>
   );
