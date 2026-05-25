@@ -51,18 +51,28 @@ const [isTyping, setIsTyping] = useState(false);
   const sendMessage = async ({ content, receiverId, file }) => {
     try {
       const formData = new FormData();
-      formData.append("content", content);
+
+      formData.append("content", content || "");
+
       formData.append("receiverId", receiverId);
-      if (file) formData.append("file", file);
+
+      if (file) {
+        formData.append("file", file);
+      }
 
       const res = await axiosInstance.post("/messages/send", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      setMessages((prev) => [...prev, res.data]);
+      if (res.data) {
+        setMessages((prev) => [...prev, res.data]);
+      }
     } catch (error) {
       console.log("sendMessage error:", error.response?.data || error.message);
-      toast.error("Failed to send message");
+
+      toast.error(error.response?.data?.message || "Failed to send message");
     }
   };
 

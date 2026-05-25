@@ -15,13 +15,14 @@ function SideBar() {
   const { activeTab } = useChat();
   const { authUser } = useAuth();
 
+  
   const [searchQuery, setSearchQuery] = useState("");
 
   // normalize search (prevents repeated .toLowerCase() in children)
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
   return (
-    <div className="w-full md:w-100 border-r border-[#343636] flex flex-col relative bg-linear-to-br from-[#1a0114] via-[#4a0322] to-[#240101]">
+    <div className="w-full md:w-100 border-r border-[#343636] flex flex-col relative bg-linear-to-br from-[#2a030a] via-[#400505] to-[#290000]">
       {/* 🔹 Header (Sticky) */}
       <div className="p-4 sticky top-0 z-10 ">
         <ProfileHeader />
