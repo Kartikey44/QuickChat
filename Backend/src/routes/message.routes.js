@@ -1,27 +1,65 @@
 import express from "express";
-import { protectRoute } from "../middleware/auth.middleware.js";
-import { uploadChatImage } from "../middleware/upload.middleware.js";
 
 import {
+  getContactsData,
+  getMessages,
   sendMessage,
-  getMessageByUserId,
+  getUnreadCount,
+  getUnreadChats,
   markMessagesAsRead,
-  getContactsData
 } from "../controllers/message.controller.js";
+
+import { protectRoute } from "../middleware/auth.middleware.js";
+
+import {
+  uploadChatImage,
+} from "../middleware/upload.middleware.js";
 
 const router = express.Router();
 
-router.get("/contacts-data", protectRoute, getContactsData);
+/* Contacts */
 
-router.get("/:id", protectRoute, getMessageByUserId);
+router.get(
+  "/contacts-data",
+  protectRoute,
+  getContactsData
+);
+
+/* Messages */
+
+router.get(
+  "/:userId",
+  protectRoute,
+  getMessages
+);
 
 router.post(
   "/send",
   protectRoute,
-  uploadChatImage.single("image"),
+  uploadChatImage.single("file"),
   sendMessage
 );
 
-router.put("/mark-read/:senderId", protectRoute, markMessagesAsRead);
+/* Unread */
+
+router.get(
+  "/unread/count",
+  protectRoute,
+  getUnreadCount
+);
+
+router.get(
+  "/unread/chats",
+  protectRoute,
+  getUnreadChats
+);
+
+/* Mark Read */
+
+router.put(
+  "/mark-read/:senderId",
+  protectRoute,
+  markMessagesAsRead
+);
 
 export default router;

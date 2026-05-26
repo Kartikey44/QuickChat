@@ -8,26 +8,41 @@ const ChatContext = createContext();
 export const ChatProvider = ({ children }) => {
   const [chats, setChats] = useState([]);
   const [chatPartners, setChatPartners] = useState([]);
+
   const [newContacts, setNewContacts] = useState([]);
 
   const [messages, setMessages] = useState([]);
+
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [activeTab, setActiveTab] = useState("all");
+
   const [unreadCounts, setUnreadCounts] = useState({});
 
   const [isUserLoading, setIsUserLoading] = useState(false);
+
   const [isMessageLoading, setIsMessageLoading] = useState(false);
-const [isTyping, setIsTyping] = useState(false);
+
+  const [isTyping, setIsTyping] = useState(false);
+
   const { authUser, socket } = useAuth();
+
+  /* -------------------------------- */
+  /* Contacts */
+  /* -------------------------------- */
 
   const getContactsData = async () => {
     setIsUserLoading(true);
+
     try {
       const res = await axiosInstance.get("/messages/contacts-data");
+
       const { allUsers, chatPartners, newContacts } = res.data;
+
       setChats(allUsers);
+
       setChatPartners(chatPartners);
+
       setNewContacts(newContacts);
     } catch (error) {
       toast.error(error.response?.data?.message || "Error fetching contacts");
@@ -36,17 +51,45 @@ const [isTyping, setIsTyping] = useState(false);
     }
   };
 
+  /* -------------------------------- */
+  /* Normalize Message */
+  /* -------------------------------- */
+
+  const normalizeMessage = (msg) => {
+    return {
+      ...msg,
+
+      senderId: msg.senderId?._id || msg.senderId,
+
+      receiverId: msg.receiverId?._id || msg.receiverId,
+    };
+  };
+
+  /* -------------------------------- */
+  /* Get Messages */
+  /* -------------------------------- */
+
   const getMessages = async (userId) => {
     setIsMessageLoading(true);
+
     try {
       const res = await axiosInstance.get(`/messages/${userId}`);
-      setMessages(res.data.messages);
-    } catch {
+
+      const normalized = res.data.messages.map(normalizeMessage);
+
+      setMessages(normalized);
+    } catch (error) {
+      console.log(error);
+
       toast.error("Error fetching messages");
     } finally {
       setIsMessageLoading(false);
     }
   };
+
+  /* -------------------------------- */
+  /* Send Message */
+  /* -------------------------------- */
 
   const sendMessage = async ({ content, receiverId, file }) => {
     try {
@@ -67,7 +110,9 @@ const [isTyping, setIsTyping] = useState(false);
       });
 
       if (res.data) {
-        setMessages((prev) => [...prev, res.data]);
+        const normalized = normalizeMessage(res.data);
+
+        setMessages((prev) => [...prev, normalized]);
       }
     } catch (error) {
       console.log("sendMessage error:", error.response?.data || error.message);
@@ -76,37 +121,70 @@ const [isTyping, setIsTyping] = useState(false);
     }
   };
 
+  /* -------------------------------- */
+  /* Mark Read */
+  /* -------------------------------- */
+
   const markAsRead = async (userId) => {
     try {
       await axiosInstance.put(`/messages/mark-read/${userId}`);
-      setUnreadCounts((prev) => ({ ...prev, [userId]: 0 }));
-    } catch {}
+
+      setUnreadCounts((prev) => ({
+        ...prev,
+
+        [userId]: 0,
+      }));
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  /* -------------------------------- */
+  /* Select User */
+  /* -------------------------------- */
 
   const selectUser = async (user) => {
     setSelectedUser(user);
+
     setMessages([]);
+
     await getMessages(user._id);
+
     if (unreadCounts[user._id] > 0) {
       await markAsRead(user._id);
     }
   };
 
+  /* -------------------------------- */
+  /* Incoming Message */
+  /* -------------------------------- */
+
   const handleIncomingMessage = (newMessage) => {
-    const isActiveChat = selectedUser?._id === newMessage.senderId;
+    const normalizedMessage = normalizeMessage(newMessage);
+
+    const incomingSenderId = normalizedMessage.senderId;
+
+    const isActiveChat =
+      incomingSenderId?.toString() === selectedUser?._id?.toString();
 
     if (isActiveChat) {
-      setMessages((prev) => [...prev, newMessage]);
-      if (unreadCounts[newMessage.senderId] > 0) {
-        markAsRead(newMessage.senderId);
+      setMessages((prev) => [...prev, normalizedMessage]);
+
+      if (unreadCounts[incomingSenderId] > 0) {
+        markAsRead(incomingSenderId);
       }
     } else {
       setUnreadCounts((prev) => ({
         ...prev,
-        [newMessage.senderId]: (prev[newMessage.senderId] || 0) + 1,
+
+        [incomingSenderId]: (prev[incomingSenderId] || 0) + 1,
       }));
     }
   };
+
+  /* -------------------------------- */
+  /* Socket Messages */
+  /* -------------------------------- */
 
   useEffect(() => {
     if (!socket) return;
@@ -118,28 +196,38 @@ const [isTyping, setIsTyping] = useState(false);
     };
   }, [socket, selectedUser, unreadCounts]);
 
+  /* -------------------------------- */
+  /* Initial Contacts */
+  /* -------------------------------- */
+
   useEffect(() => {
     if (authUser) {
       getContactsData();
     }
   }, [authUser]);
+
+  /* -------------------------------- */
+  /* Typing */
+  /* -------------------------------- */
+
   useEffect(() => {
     if (!socket) return;
 
     socket.on("typing", ({ senderId }) => {
-      if (selectedUser?._id === senderId) {
+      if (senderId?.toString() === selectedUser?._id?.toString()) {
         setIsTyping(true);
       }
     });
 
     socket.on("stopTyping", ({ senderId }) => {
-      if (selectedUser?._id === senderId) {
+      if (senderId?.toString() === selectedUser?._id?.toString()) {
         setIsTyping(false);
       }
     });
 
     return () => {
       socket.off("typing");
+
       socket.off("stopTyping");
     };
   }, [socket, selectedUser]);
@@ -150,14 +238,19 @@ const [isTyping, setIsTyping] = useState(false);
         chats,
         chatPartners,
         newContacts,
+
         messages,
         selectedUser,
+
         unreadCounts,
         activeTab,
+
         isUserLoading,
-        isTyping,
         isMessageLoading,
+        isTyping,
+
         setActiveTab,
+
         selectUser,
         sendMessage,
         getMessages,

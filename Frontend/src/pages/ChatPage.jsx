@@ -32,7 +32,7 @@ export default function ChatPage() {
   return (
     <div className="h-screen w-full bg-linear-to-br from-[#de3c62] via-[#4a0322] to-[#730505] text-white flex overflow-hidden">
       {/* MinSidebar */}
-      <div className=" hidden md:flex flex-col w-15 border-r border-[#343636]">
+      <div className=" hidden md:flex flex-col w-35 border-r border-[#343636]">
         <MinSideBar />
       </div>
 

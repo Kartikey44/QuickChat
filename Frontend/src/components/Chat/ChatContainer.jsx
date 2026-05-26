@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useChat } from "../../context/ChatContext";
 import { useAuth } from "../../context/AuthContext";
-import ChatSender from "../Chat/ChatSender";
-import ChatHeader from "../Chat/ChatHeader";
-import TypingBubble from "../Chat/TypingBubble";
+import ChatSender from "./ChatSender";
+import ChatHeader from "./ChatHeader";
+import TypingBubble from "./TypingBubble";
+import MediaOverlay from "./MediaOverlay";
 
 function ChatContainer() {
   const { selectedUser, getMessages, messages, isTyping } = useChat();
   const { authUser } = useAuth();
-
   const messagesEndRef = useRef(null);
   const [showMedia, setShowMedia] = useState(false);
 
@@ -17,80 +17,88 @@ function ChatContainer() {
   }, [messages, isTyping]);
 
   useEffect(() => {
-    if (selectedUser?._id) {
-      getMessages(selectedUser._id);
-    }
+    if (selectedUser?._id) getMessages(selectedUser._id);
   }, [selectedUser]);
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="h-17">
+    <div className="relative flex flex-col h-full w-full bg-[#2a0f0f]">
+      {showMedia && (
+        <MediaOverlay messages={messages} onClose={() => setShowMedia(false)} />
+      )}
+
+      <div className="border-b border-zinc-800">
         <ChatHeader onOpenMedia={() => setShowMedia(true)} />
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar px-4 bg-linear-to-br from-[#2e0c14] via-[#1a010b] to-[#170000] py-2 space-y-3">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-5 space-y-4 bg-gradient-to-br from-[#271111] via-[#2a0f15] to-[#170206]">
         {Array.isArray(messages) &&
           messages.map((msg) => {
-            const isSender =
-              msg.senderId?.toString() === authUser._id?.toString();
+            const senderId = msg.senderId?._id || msg.senderId;
+
+            const authId = authUser?._id;
+
+            const isSender = senderId?.toString() === authId?.toString();
 
             return (
               <div
                 key={msg._id}
-                className={`flex ${isSender ? "justify-start" : "justify-end"}`}
+                className={`w-full flex ${
+                  isSender ? "justify-end" : "justify-start"
+                }`}
               >
                 <div
-                  className={`relative max-w-xs px-3 py-2 text-white rounded-2xl ${
+                  className={`max-w-[75%] px-4 py-3 rounded-2xl shadow-md ${
                     isSender
-                      ? "bg-[#04354e] rounded-bl-none"
-                      : "bg-[#ce0707] rounded-br-none"
+                      ? "bg-cyan-700 rounded-br-sm"
+                      : "bg-zinc-800 rounded-bl-sm"
                   }`}
                 >
-
+                  {/* TEXT */}
                   {msg.content && (
-                    <div className="flex gap-2 items-end">
-                      <p className="wrap-break-words">{msg.content}</p>
-                      <p className="text-[10px] text-gray-300">
+                    <div className="flex flex-col gap-1">
+                      <p className="text-sm text-white break-words">
+                        {msg.content}
+                      </p>
+
+                      <span className="text-[10px] text-zinc-300 self-end">
                         {new Date(msg.createdAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
-                      </p>
+                      </span>
                     </div>
                   )}
 
+                  {/* IMAGE */}
                   {msg.image && (
-                    <div className="relative mt-1">
+                    <div className="relative mt-2">
                       <img
                         src={msg.image}
                         alt="media"
-                        className="rounded-lg max-w-40 object-cover"
+                        className="rounded-xl max-w-[250px] object-cover"
                       />
-                      <p className="absolute bottom-1 right-2 text-[10px] text-white  px-1 rounded">
+
+                      <span className="absolute bottom-2 right-2 text-[10px] bg-black/50 px-2 py-1 rounded text-white">
                         {new Date(msg.createdAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
-                      </p>
+                      </span>
                     </div>
                   )}
                 </div>
               </div>
             );
           })}
-
         {isTyping && <TypingBubble isSender={false} />}
-
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="h-20">
-        <div className="px-3 bg-lineart-to-br from-[#0f0000] to-[#3a0105] py-3 shadow-2xl h-full flex items-center">
-          <ChatSender />
-        </div>
+      <div className="border-t border-zinc-800 bg-[#2a0f0f] px-3 py-3">
+        <ChatSender />
       </div>
     </div>
   );
 }
 
-export default ChatContainer; 
+export default ChatContainer;

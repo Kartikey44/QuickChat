@@ -96,7 +96,7 @@ export const signup = async (req, res) => {
       success: true,
       message: "Login successful",
       user: {
-        id: user._id,
+      _id: user._id,
         name: user.name,
         email: user.email,
         profileimg: user.profileimg,
@@ -122,9 +122,6 @@ export const login = async (req, res) => {
         message: "All fields are required",
       });
     }
-
-    // Detect Email or Mobile
-
     const emailRegex =
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -134,8 +131,6 @@ export const login = async (req, res) => {
     const query = isEmail
       ? { email: identifier.toLowerCase() }
       : { mobile: identifier };
-
-    // Find User
 
     const user = await User.findOne(query)
       .select("+password");
@@ -147,9 +142,7 @@ export const login = async (req, res) => {
       });
     }
 
-    // Compare Password
-
-    const isPasswordCorrect =
+      const isPasswordCorrect =
       await user.comparePassword(password);
 
     if (!isPasswordCorrect) {
@@ -158,8 +151,6 @@ export const login = async (req, res) => {
         message: "Invalid credentials",
       });
     }
-
-    // Generate Token
 
     const token = user.generateAuthToken();
     res.cookie("token", token, {
@@ -172,7 +163,7 @@ export const login = async (req, res) => {
       success: true,
       message: "Login successful",
       user: {
-        id: user._id,
+      _id: user._id,
         name: user.name,
         email: user.email,
         profileimg: user.profileimg,

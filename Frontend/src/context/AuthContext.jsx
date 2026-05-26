@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
       withCredentials: true,
 
       query: {
-        userId: user.id,
+        userId: user._id,
       },
     });
 
@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }) => {
     setLoggingIn(true);
 
     try {
-      const res = await axiosInstance.post("/auth/", userData);
+      const res = await axiosInstance.post("/auth/login", userData);
 
       setAuthUser(res.data.user);
 

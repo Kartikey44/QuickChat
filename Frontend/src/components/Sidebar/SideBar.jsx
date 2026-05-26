@@ -23,7 +23,6 @@ function SideBar() {
 
   return (
     <div className="w-full md:w-100 border-r border-[#343636] flex flex-col relative bg-linear-to-br from-[#2a030a] via-[#400505] to-[#290000]">
-      {/* 🔹 Header (Sticky) */}
       <div className="p-4 sticky top-0 z-10 ">
         <ProfileHeader />
       </div>

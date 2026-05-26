@@ -31,7 +31,6 @@ app.use('/api/auth', authRoute);
 app.use('/api/messages', messageRoute);
 app.use('/api', uploadRoute);
 
-// Health check route
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
