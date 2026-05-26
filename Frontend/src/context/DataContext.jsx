@@ -5,11 +5,14 @@ const DataContext = createContext();
 export const DataProvider = ({ children }) => {
     const [showProfile, setShowProfile] = useState(false)
     const [showContacts, setShowContacts] = useState(false)
+     const [openMenu, setOpenMenu] = useState(false);
     return (
         <DataContext.Provider
             value={{
                 showProfile,
                 showContacts,
+                openMenu,
+                setOpenMenu,
                 setShowProfile,
                 setShowContacts
             }}

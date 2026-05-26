@@ -7,7 +7,7 @@ function NoChatContainer() {
   const { newContacts, selectUser } = useChat();
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-4">
+    <div className="h-full max-w-3xl flex items-center justify-center p-4">
       <div className="flex flex-col items-center gap-6 w-full max-w-lg">
         {/* Empty State */}
         <div className="bg-cyan-900/10 w-full h-64 rounded-[40px] flex flex-col items-center justify-center gap-4 text-center">

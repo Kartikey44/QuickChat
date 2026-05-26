@@ -6,11 +6,12 @@ import { RiContactsBook3Fill } from "react-icons/ri";
 import { useState,useRef,useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useData } from "../../context/DataContext";
+import { useChat } from "../../context/ChatContext";
 
 function MinSideBar() {
   const { logout, authUser } = useAuth();
-  const { setShowProfile, setShowContacts } = useData();
-  const [openMenu, setOpenMenu] = useState(false);
+  const {unreadCounts}=useChat()
+  const { setShowProfile, setShowContacts,openMenu,setOpenMenu } = useData();
   const menuRef = useRef();
    useEffect(() => {
      const handleClickOutside = (e) => {
@@ -26,7 +27,7 @@ function MinSideBar() {
      };
    }, []);
   return (
-    <div className="hidden md:flex flex-col justify-between h-screen w-20 lg:w-full bg-[#271111] border-r border-zinc-800 shadow-xl">
+    <div className="hidden md:flex flex-col justify-between h-screen w-40 lg:w-full bg-[#271111] border-r border-zinc-800 shadow-xl">
       <div>
         {/* Logo */}
         <div className="flex items-center px-2 justify-center lg:justify-start gap-2 py-6 border-b border-zinc-800">
@@ -43,6 +44,7 @@ function MinSideBar() {
           <button
             onClick={() => {
               setShowProfile(false);
+
               setShowContacts(false);
             }}
             className="flex items-center gap-2 px-4 py-3 rounded-xl hover:bg-zinc-800 transition-all duration-200 text-zinc-300 hover:text-white"
@@ -50,10 +52,14 @@ function MinSideBar() {
             <div className="relative">
               <TbMessageCircleFilled size={20} className="-rotate-90" />
 
-              <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-red-600 text-white rounded-full">
-                2
-              </span>
+              {Object.values(unreadCounts || {}).reduce((a, b) => a + b, 0) >
+                0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-bold bg-red-600 text-white rounded-full">
+                  {Object.values(unreadCounts || {}).reduce((a, b) => a + b, 0)}
+                </span>
+              )}
             </div>
+
             <span className="hidden lg:block text-base font-medium">Chats</span>
           </button>
 

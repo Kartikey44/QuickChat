@@ -50,11 +50,6 @@ export const ChatProvider = ({ children }) => {
       setIsUserLoading(false);
     }
   };
-
-  /* -------------------------------- */
-  /* Normalize Message */
-  /* -------------------------------- */
-
   const normalizeMessage = (msg) => {
     return {
       ...msg,
@@ -64,11 +59,6 @@ export const ChatProvider = ({ children }) => {
       receiverId: msg.receiverId?._id || msg.receiverId,
     };
   };
-
-  /* -------------------------------- */
-  /* Get Messages */
-  /* -------------------------------- */
-
   const getMessages = async (userId) => {
     setIsMessageLoading(true);
 
@@ -86,10 +76,6 @@ export const ChatProvider = ({ children }) => {
       setIsMessageLoading(false);
     }
   };
-
-  /* -------------------------------- */
-  /* Send Message */
-  /* -------------------------------- */
 
   const sendMessage = async ({ content, receiverId, file }) => {
     try {
@@ -121,10 +107,6 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  /* -------------------------------- */
-  /* Mark Read */
-  /* -------------------------------- */
-
   const markAsRead = async (userId) => {
     try {
       await axiosInstance.put(`/messages/mark-read/${userId}`);
@@ -143,21 +125,9 @@ export const ChatProvider = ({ children }) => {
   /* Select User */
   /* -------------------------------- */
 
-  const selectUser = async (user) => {
+  const selectUser = (user) => {
     setSelectedUser(user);
-
-    setMessages([]);
-
-    await getMessages(user._id);
-
-    if (unreadCounts[user._id] > 0) {
-      await markAsRead(user._id);
-    }
   };
-
-  /* -------------------------------- */
-  /* Incoming Message */
-  /* -------------------------------- */
 
   const handleIncomingMessage = (newMessage) => {
     const normalizedMessage = normalizeMessage(newMessage);
@@ -181,11 +151,6 @@ export const ChatProvider = ({ children }) => {
       }));
     }
   };
-
-  /* -------------------------------- */
-  /* Socket Messages */
-  /* -------------------------------- */
-
   useEffect(() => {
     if (!socket) return;
 
@@ -255,6 +220,7 @@ export const ChatProvider = ({ children }) => {
         sendMessage,
         getMessages,
         markAsRead,
+        setSelectedUser,
         getContactsData,
       }}
     >

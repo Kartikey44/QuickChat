@@ -17,8 +17,6 @@ function SideBar() {
 
   
   const [searchQuery, setSearchQuery] = useState("");
-
-  // normalize search (prevents repeated .toLowerCase() in children)
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
   return (
@@ -26,8 +24,6 @@ function SideBar() {
       <div className="p-4 sticky top-0 z-10 ">
         <ProfileHeader />
       </div>
-
-      {/* 🔹 Search + Tabs */}
       <div className="flex flex-col gap-4 px-3 py-2">
         <ChatSearchBar onSearch={setSearchQuery} />
         <ActiveTabSwitch />

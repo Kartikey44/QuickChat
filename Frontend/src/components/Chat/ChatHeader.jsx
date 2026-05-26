@@ -1,12 +1,12 @@
 import React from "react";
-import { Phone, Video, ImageIcon, MoreVertical } from "lucide-react";
+import { Phone, Video, ImageIcon, MoreVertical, ArrowLeft } from "lucide-react";
 
 import { useChat } from "../../context/ChatContext";
 import { useAuth } from "../../context/AuthContext";
 import Avatar from "../../assets/Avatar.png";
 
 function ChatHeader({ onOpenMedia }) {
-  const { selectedUser, isTyping } = useChat();
+  const { selectedUser, isTyping, setSelectedUser } = useChat();
 
   const { onlineUsers } = useAuth();
 
@@ -23,6 +23,14 @@ function ChatHeader({ onOpenMedia }) {
       <div className="relative z-10 flex items-center justify-between px-4 md:px-6 py-4">
         {/* LEFT */}
         <div className="flex items-center gap-4">
+          {/* MOBILE BACK BUTTON */}
+          <button
+            onClick={() => setSelectedUser(null)}
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500/20 transition"
+          >
+            <ArrowLeft size={20} className="text-white" />
+          </button>
+
           {/* Avatar */}
           <div className="relative">
             <div className="absolute inset-0 rounded-full bg-red-500/20 blur-lg"></div>
@@ -49,7 +57,6 @@ function ChatHeader({ onOpenMedia }) {
               {selectedUser?.name || "User"}
             </h2>
 
-            {/* Status */}
             <div className="flex items-center gap-2">
               <span
                 className={`w-2 h-2 rounded-full ${
