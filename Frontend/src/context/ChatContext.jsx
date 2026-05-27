@@ -185,11 +185,34 @@ export const ChatProvider = ({ children }) => {
     try {
       await axiosInstance.delete(`/messages/clear/${selectedUser._id}`);
 
+      // clear opened chat
       setMessages([]);
+
+      // move cleared chat to bottom
+      setChatPartners((prev) => {
+        const updated = prev.map((user) =>
+          user._id === selectedUser._id
+            ? {
+                ...user,
+                lastMessageTime: null,
+              }
+            : user,
+        );
+
+        return updated.sort((a, b) => {
+          if (!a.lastMessageTime) return 1;
+
+          if (!b.lastMessageTime) return -1;
+
+          return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
+        });
+      });
 
       toast.success("Chat cleared");
     } catch (error) {
-      toast.error(error.message);
+      console.log(error);
+
+      toast.error(error.response?.data?.message || "Failed to clear chat");
     }
   };
 
