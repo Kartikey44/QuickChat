@@ -1,9 +1,5 @@
-import Loader from "./components/Sidebar/Loader";
-
 import { useAuth } from "./context/AuthContext";
-
 import { Routes, Route, Navigate } from "react-router-dom";
-
 import ChatPage from "./pages/ChatPage";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -14,17 +10,10 @@ import { Toaster } from "react-hot-toast";
 import Landing from "./components/Landing";
 
 function App() {
-  const { authUser, isCheckingAuth } = useAuth();
+  const { authUser} = useAuth();
 
   return (
     <div className="min-h-screen w-screen">
-      {/* OPTIONAL TOP LOADER */}
-      {isCheckingAuth && (
-        <div className="fixed top-0 left-0 z-[9999] w-full">
-          <Loader type="line" fullScreen={false} />
-        </div>
-      )}
-
       <Routes>
         {/* CHAT */}
         <Route
