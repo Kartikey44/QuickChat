@@ -65,7 +65,7 @@ export default function ChatPage() {
   return (
     <div className="h-screen w-full overflow-hidden flex bg-linear-to-br from-[#de3c62] via-[#4a0322] to-[#730505] text-white">
       {/* Mini Sidebar */}
-      <div className="hidden md:flex flex-col w-30 lg:w-30 border-r border-[#343636] shrink-0">
+      <div className="hidden md:flex flex-col w-30 lg:w-20 border-r border-[#343636] shrink-0">
         <MinSideBar />
       </div>
 
@@ -73,12 +73,10 @@ export default function ChatPage() {
       <div
         className={`${
           selectedUser ? "hidden md:flex" : "flex"
-        } w-full md:w-90 lg:w-100 shrink-0`}
+        } w-full md:w-90 lg:w-90 shrink-0`}
       >
         <SideBar />
       </div>
-
-      {/* Chat Container */}
       <div
         className={`${selectedUser ? "flex" : "hidden md:flex"} flex-1 min-w-0`}
       >

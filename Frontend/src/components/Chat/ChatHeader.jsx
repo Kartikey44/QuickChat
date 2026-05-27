@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Phone, Video, ImageIcon, MoreVertical, ArrowLeft } from "lucide-react";
 
 import { useChat } from "../../context/ChatContext";
@@ -6,18 +6,32 @@ import { useAuth } from "../../context/AuthContext";
 import Avatar from "../../assets/Avatar.png";
 
 function ChatHeader({ onOpenMedia }) {
-  const { selectedUser, isTyping, setSelectedUser } = useChat();
-
+  const { selectedUser, isTyping, setSelectedUser,clearChat } = useChat();
+  const [openMore, setOpenMore] = useState(false);
   const { onlineUsers } = useAuth();
 
   const isOnline = onlineUsers.includes(selectedUser?._id);
+  const menuRef = useRef(null);
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMore(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div className="relative w-full overflow-hidden border-b border-white/10 bg-gradient-to-r from-[#140107]/95 via-[#1b0006]/95 to-[#120003]/95 backdrop-blur-2xl">
+    <div className="relative w-full  border-b border-white/10 bg-linear-to-r from-[#140107]/95 via-[#1b0006]/95 to-[#120003]/95 backdrop-blur-2xl">
       {/* Glow Effects */}
-      <div className="absolute top-[-80px] left-[20%] w-[180px] h-[180px] bg-red-700/10 blur-3xl rounded-full"></div>
+      <div className="absolute -top-20 left-[20%] w-45 h-45 bg-red-700/10 blur-3xl rounded-full"></div>
 
-      <div className="absolute bottom-[-100px] right-[10%] w-[200px] h-[200px] bg-pink-700/10 blur-3xl rounded-full"></div>
+      <div className="absolute -bottom-25 right-[10%] w-50 h-500 bg-pink-700/10 blur-3xl rounded-full"></div>
 
       {/* Main Header */}
       <div className="relative z-10 flex items-center justify-between px-4 md:px-6 py-4">
@@ -74,7 +88,7 @@ function ChatHeader({ onOpenMedia }) {
         {/* RIGHT ACTIONS */}
         <div className="flex items-center gap-2 md:gap-3">
           {/* Voice Call */}
-          <button className="group hidden sm:flex items-center justify-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-300">
+          <button className="group hidden cursor-pointer sm:flex items-center justify-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-300">
             <Phone
               size={18}
               className="text-zinc-300 group-hover:text-red-300 transition"
@@ -82,7 +96,7 @@ function ChatHeader({ onOpenMedia }) {
           </button>
 
           {/* Video Call */}
-          <button className="group hidden sm:flex items-center justify-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-300">
+          <button className="group hidden sm:flex cursor-pointer items-center justify-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-300">
             <Video
               size={18}
               className="text-zinc-300 group-hover:text-red-300 transition"
@@ -92,7 +106,7 @@ function ChatHeader({ onOpenMedia }) {
           {/* Media */}
           <button
             onClick={onOpenMedia}
-            className="group flex items-center justify-center gap-2 px-4 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-300"
+            className="group flex items-center cursor-pointer justify-center gap-2 px-4 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-300"
           >
             <ImageIcon
               size={18}
@@ -105,12 +119,35 @@ function ChatHeader({ onOpenMedia }) {
           </button>
 
           {/* More */}
-          <button className="group flex items-center justify-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 transition-all duration-300">
-            <MoreVertical
-              size={18}
-              className="text-zinc-300 group-hover:text-red-300 transition"
-            />
-          </button>
+          <div ref={menuRef} className="relative">
+            <button
+              onClick={() => setOpenMore((prev) => !prev)}
+              className="group flex items-center justify-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 cursor-pointer hover:border-red-500/30 transition-all duration-300"
+            >
+              <MoreVertical
+                size={18}
+                className="text-zinc-300  group-hover:text-red-300 transition"
+              />
+            </button>
+
+            {openMore && (
+              <div className="absolute top-14 right-0 z-50 w-44 overflow-hidden rounded-2xl border border-white/10 bg-[#1a0008]/95 backdrop-blur-2xl shadow-2xl">
+                <button
+                  onClick={() => {
+                    clearChat();
+                    setOpenMore(false);
+                  }}
+                  className="w-full px-4 py-3 text-left cursor-pointer text-sm text-zinc-300 hover:bg-white/5"
+                >
+                  Clear Chat
+                </button>
+
+                <button className="w-full cursor-pointer px-4 py-3 text-left text-sm text-red-400 hover:bg-red-500/10">
+                  Delete Chat
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

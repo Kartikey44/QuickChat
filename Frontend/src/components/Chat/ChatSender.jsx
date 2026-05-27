@@ -84,7 +84,7 @@ function ChatSender() {
           <div className="absolute bottom-[-120px] right-[10%] w-[300px] h-[300px] bg-pink-700/20 blur-3xl rounded-full"></div>
 
           <div className="relative w-full max-w-4xl max-h-[95vh] bg-[#140107]/95 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl backdrop-blur-2xl flex flex-col">
-            <div className="flex items-center justify-between px-5 md:px-6 py-4 border-b border-white/10 bg-white/5 shrink-0">
+            <div className="flex items-center justify-between px-5 md:px-6 py-2 border-b border-white/10 bg-white/5 shrink-0">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-500/20 flex items-center justify-center">
                   <ImagePlus size={24} className="text-red-300" />
@@ -168,10 +168,10 @@ function ChatSender() {
       )}
 
       <div className="relative w-full">
-        <div className="flex items-center gap-3 bg-white/5 border border-white/10 backdrop-blur-2xl rounded-3xl px-4 py-3 shadow-2xl">
-          <label className="group flex items-center justify-center min-w-[48px] h-12 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 cursor-pointer transition-all duration-300">
+        <div className="flex items-center gap-3 bg-white/5 border border-white/10 backdrop-blur-2xl rounded-full px-4 py-2 shadow-2xl">
+          <label className="group flex items-center justify-center min-w-[48px] h-12 rounded-full bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 cursor-pointer transition-all duration-300">
             <ImagePlus
-              size={22}
+              size={20}
               className="text-zinc-300 group-hover:text-red-300 transition"
             />
 
@@ -213,7 +213,7 @@ function ChatSender() {
           <button
             onClick={handleSend}
             disabled={!tempMessage.trim() && !file}
-            className={`min-w-[52px] h-12 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-lg ${
+            className={`min-w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${
               tempMessage.trim() || file
                 ? "bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 shadow-red-900/40"
                 : "bg-white/5 border border-white/10 cursor-not-allowed"

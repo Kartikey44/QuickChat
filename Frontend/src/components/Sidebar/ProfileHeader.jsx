@@ -41,7 +41,7 @@ function ProfileHeader() {
           {/* New Chat */}
           <button
             onClick={() => setShowContacts(true)}
-            className="group flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 shadow-lg shadow-red-900/40 transition-all duration-300"
+            className="group flex items-center justify-center w-11 h-11 rounded-2xl cursor-pointer bg-linear-to-br from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 shadow-lg shadow-red-900/40 transition-all duration-300"
           >
             <MessageSquarePlus size={20} className="text-white" />
           </button>
@@ -54,7 +54,7 @@ function ProfileHeader() {
             >
               <Settings
                 size={19}
-                className="text-zinc-300 group-hover:text-gray-300 transition"
+                className="text-zinc-300 cursor-pointer group-hover:text-gray-300 transition"
               />
             </button>
 
@@ -78,7 +78,7 @@ function ProfileHeader() {
                     setShowProfile(true);
                     setOpenDropdown(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-zinc-300 hover:bg-white/5 transition"
+                  className="w-full cursor-pointer flex items-center gap-3 px-4 py-3 text-sm text-zinc-300 hover:bg-white/5 transition"
                 >
                   <User size={18} />
                   My Profile
@@ -87,7 +87,7 @@ function ProfileHeader() {
                 {/* Logout */}
                 <button
                   onClick={logout}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition"
+                  className="w-full flex cursor-pointer items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition"
                 >
                   <LogOut size={18} />
                   Logout

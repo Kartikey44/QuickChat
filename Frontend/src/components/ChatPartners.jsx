@@ -48,10 +48,10 @@ export default function ChatPartners({ searchQuery = "" }) {
           <div
             key={chat._id}
             onClick={() => handleSelectUser(chat)}
-            className={`px-4 py-3 rounded-xl cursor-pointer transition-all ${
+            className={`px-2 py-2 rounded-xl cursor-pointer transition-all ${
               selectedUser?._id === chat._id
-                ? "bg-[#ba0d0d]"
-                : "hover:bg-[#3a0b0b]"
+                ? "bg-[#f10505]"
+                : "hover:bg-[#540101]"
             }`}
           >
             <div className="w-full flex items-center gap-3">
