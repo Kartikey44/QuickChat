@@ -1,17 +1,32 @@
 import { createContext, useContext, useState, useEffect } from "react";
+
 import axiosInstance from "../lib/axios";
+
 import toast from "react-hot-toast";
+import AI_logo from '../assets/AI_logo.png'
 import { useAuth } from "./AuthContext";
 
 const ChatContext = createContext();
 
+const AI_USER = {
+  _id: "ai-assistant",
+  name: "Namaste AI",
+  email: "namasteai@quickchat.com",
+  profileimg: AI_logo,
+  isAI: true,
+};
+
 export const ChatProvider = ({ children }) => {
+
+  const [messages, setMessages] = useState([]);
+
+  const [aiMessages, setAiMessages] = useState([]);
+  
   const [chats, setChats] = useState([]);
+
   const [chatPartners, setChatPartners] = useState([]);
 
   const [newContacts, setNewContacts] = useState([]);
-
-  const [messages, setMessages] = useState([]);
 
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -24,6 +39,8 @@ export const ChatProvider = ({ children }) => {
   const [isMessageLoading, setIsMessageLoading] = useState(false);
 
   const [isTyping, setIsTyping] = useState(false);
+
+  const [isAllTyping, setIsAllTyping] = useState(false);
 
   const { authUser, socket } = useAuth();
 
@@ -47,7 +64,7 @@ export const ChatProvider = ({ children }) => {
 
       setChats(allUsers);
 
-      setChatPartners(chatPartners);
+      setChatPartners([AI_USER, ...chatPartners]);
 
       setNewContacts(newContacts);
     } catch (error) {
@@ -57,7 +74,13 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
+ const openAIChat = () => {
+   setSelectedUser(AI_USER);
+  };
+  
   const getMessages = async (userId) => {
+    if (selectedUser?.isAI) return;
+
     setIsMessageLoading(true);
 
     try {
@@ -74,6 +97,69 @@ export const ChatProvider = ({ children }) => {
       setIsMessageLoading(false);
     }
   };
+ 
+ const clearChat = async () => {
+   try {
+     if (!selectedUser) return;
+
+     if (selectedUser.isAI) {
+       setAiMessages([]);
+
+       try {
+         await axiosInstance.delete("/ai/conversation/default-ai-chat");
+       } catch (err) {
+         console.log(err);
+       }
+
+       toast.success("AI chat cleared");
+       return;
+     }
+
+     await axiosInstance.delete(`/messages/clear/${selectedUser._id}`);
+
+     setMessages([]);
+
+     await getContactsData();
+
+     toast.success("Chat cleared");
+   } catch (error) {
+     console.error(error);
+
+     toast.error("Failed to clear chat");
+   }
+ };
+ const deleteChat = async () => {
+   try {
+     if (!selectedUser) return;
+
+     // For AI chat
+    if (selectedUser.isAI) {
+  setAiMessages([]);
+
+  setSelectedUser(null);
+
+  toast.success("AI chat deleted");
+
+  return;
+}
+
+     // For normal users
+     setMessages([]);
+
+     setChatPartners((prev) =>
+       prev.filter((user) => user._id !== selectedUser._id),
+     );
+
+     setSelectedUser(null);
+
+     toast.success("Chat deleted");
+   } catch (error) {
+     console.error(error);
+
+     toast.error("Failed to delete chat");
+   }
+  };
+  
 
   const sendMessage = async ({ content, receiverId, file, replyTo }) => {
     try {
@@ -101,24 +187,6 @@ export const ChatProvider = ({ children }) => {
         const normalized = normalizeMessage(res.data);
 
         setMessages((prev) => [...prev, normalized]);
-
-        // move active chat to top
-        setChatPartners((prev) => {
-          const updated = prev.map((user) =>
-            user._id === receiverId
-              ? {
-                  ...user,
-                  lastMessageTime: new Date().toISOString(),
-                }
-              : user,
-          );
-
-          return updated.sort(
-            (a, b) =>
-              new Date(b.lastMessageTime || 0) -
-              new Date(a.lastMessageTime || 0),
-          );
-        });
       }
     } catch (error) {
       console.log("sendMessage error:", error.response?.data || error.message);
@@ -126,145 +194,76 @@ export const ChatProvider = ({ children }) => {
       toast.error(error.response?.data?.message || "Failed to send message");
     }
   };
+const sendAIMessage = async (content) => {
+  try {
+    const userMessage = {
+      _id: crypto.randomUUID(),
+      senderId: authUser._id,
+      content,
+      createdAt: new Date(),
+    };
 
-  const editMessage = async (messageId, content) => {
-    try {
-      await axiosInstance.put(`/messages/edit/${messageId}`, {
-        content,
-      });
+    setAiMessages((prev) => [...prev, userMessage]);
 
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg._id === messageId
-            ? {
-                ...msg,
-                content,
-                edited: true,
-              }
-            : msg,
-        ),
-      );
+    setIsAllTyping(true);
 
-      toast.success("Message edited");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to edit");
-    }
-  };
-
-  const deleteMessage = async (messageId) => {
-    try {
-      await axiosInstance.delete(`/messages/delete/${messageId}`);
-
-      setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
-
-      toast.success("Message deleted");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete");
-    }
-  };
-
-  const markAsRead = async (userId) => {
-    try {
-      await axiosInstance.put(`/messages/mark-read/${userId}`);
-
-      setUnreadCounts((prev) => ({
-        ...prev,
-
-        [userId]: 0,
-      }));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const selectUser = (user) => {
-    setSelectedUser(user);
-  };
-
-  const clearChat = async () => {
-    try {
-      await axiosInstance.delete(`/messages/clear/${selectedUser._id}`);
-
-      // clear opened chat
-      setMessages([]);
-
-      // move cleared chat to bottom
-      setChatPartners((prev) => {
-        const updated = prev.map((user) =>
-          user._id === selectedUser._id
-            ? {
-                ...user,
-                lastMessageTime: null,
-              }
-            : user,
-        );
-
-        return updated.sort((a, b) => {
-          if (!a.lastMessageTime) return 1;
-
-          if (!b.lastMessageTime) return -1;
-
-          return new Date(b.lastMessageTime) - new Date(a.lastMessageTime);
-        });
-      });
-
-      toast.success("Chat cleared");
-    } catch (error) {
-      console.log(error);
-
-      toast.error(error.response?.data?.message || "Failed to clear chat");
-    }
-  };
-
-  const handleIncomingMessage = (newMessage) => {
-    const normalizedMessage = normalizeMessage(newMessage);
-
-    const incomingSenderId = normalizedMessage.senderId;
-
-    const isActiveChat =
-      incomingSenderId?.toString() === selectedUser?._id?.toString();
-
-    if (isActiveChat) {
-      setMessages((prev) => [...prev, normalizedMessage]);
-
-      if (unreadCounts[incomingSenderId] > 0) {
-        markAsRead(incomingSenderId);
-      }
-    } else {
-      setUnreadCounts((prev) => ({
-        ...prev,
-
-        [incomingSenderId]: (prev[incomingSenderId] || 0) + 1,
-      }));
-    }
-
-    // reorder chats
-    setChatPartners((prev) => {
-      const updated = prev.map((user) =>
-        user._id === incomingSenderId
-          ? {
-              ...user,
-              lastMessageTime: new Date().toISOString(),
-            }
-          : user,
-      );
-
-      return updated.sort(
-        (a, b) =>
-          new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0),
-      );
+    const res = await axiosInstance.post("/ai/chat", {
+      message: content,
+      conversationId: "default-ai-chat",
     });
-  };
 
+    const aiMessage = {
+      _id: crypto.randomUUID(),
+      senderId: "ai-assistant",
+      content: res.data.reply || "No response",
+      createdAt: new Date(),
+    };
+
+    setAiMessages((prev) => [...prev, aiMessage]);
+  } catch (error) {
+    console.log("AI ERROR:", error.response?.data);
+
+    toast.error(
+      error.response?.data?.message || "AI service is temporarily unavailable",
+    );
+  } finally {
+    setIsAllTyping(false);
+  }
+  };
+  const currentMessages = selectedUser?.isAI ? aiMessages : messages;
+  useEffect(() => {
+    if (!selectedUser?._id) return;
+
+    if (selectedUser.isAI) return;
+
+    getMessages(selectedUser._id);
+  }, [selectedUser]);
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("newMessage", handleIncomingMessage);
+    socket.on("newMessage", (newMessage) => {
+      const normalizedMessage = normalizeMessage(newMessage);
+
+      const incomingSenderId = normalizedMessage.senderId;
+
+      const isActiveChat =
+        incomingSenderId?.toString() === selectedUser?._id?.toString();
+
+      if (isActiveChat) {
+        setMessages((prev) => [...prev, normalizedMessage]);
+      } else {
+        setUnreadCounts((prev) => ({
+          ...prev,
+
+          [incomingSenderId]: (prev[incomingSenderId] || 0) + 1,
+        }));
+      }
+    });
 
     return () => {
-      socket.off("newMessage", handleIncomingMessage);
+      socket.off("newMessage");
     };
-  }, [socket, selectedUser, unreadCounts]);
+  }, [socket, selectedUser]);
 
   useEffect(() => {
     if (authUser) {
@@ -272,59 +271,41 @@ export const ChatProvider = ({ children }) => {
     }
   }, [authUser]);
 
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("typing", ({ senderId }) => {
-      if (senderId?.toString() === selectedUser?._id?.toString()) {
-        setIsTyping(true);
-      }
-    });
-
-    socket.on("stopTyping", ({ senderId }) => {
-      if (senderId?.toString() === selectedUser?._id?.toString()) {
-        setIsTyping(false);
-      }
-    });
-
-    return () => {
-      socket.off("typing");
-
-      socket.off("stopTyping");
-    };
-  }, [socket, selectedUser]);
-
   return (
     <ChatContext.Provider
       value={{
         chats,
         chatPartners,
         newContacts,
-        messages,
+        messages: currentMessages,
+        setMessages,
+        setAiMessages,
         selectedUser,
-
         unreadCounts,
         activeTab,
         isUserLoading,
         isMessageLoading,
         isTyping,
+        isAllTyping,
+
+        sendAIMessage,
+        openAIChat,
 
         clearChat,
+        deleteChat,
+
+        setMessages,
+        setSelectedUser,
+        selectUser: setSelectedUser,
         setActiveTab,
 
-        selectUser,
         sendMessage,
         getMessages,
-        markAsRead,
-        setSelectedUser,
-        getContactsData,
-
-        editMessage,
-        deleteMessage,
       }}
     >
       {children}
     </ChatContext.Provider>
   );
 };
+
 export const useChat = () => useContext(ChatContext);

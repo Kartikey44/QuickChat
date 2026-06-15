@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-
+import aiRoute from "./routes/ai.routes.js";
 import authRoute from './routes/auth.routes.js';
 import messageRoute from './routes/message.routes.js';
 import uploadRoute from './routes/upload.routes.js';
@@ -29,6 +29,7 @@ app.use(cookieParser());
 // Routes
 app.use('/api/auth', authRoute);
 app.use('/api/messages', messageRoute);
+app.use("/api/ai", aiRoute);
 app.use('/api', uploadRoute);
 
 app.get('/', (req, res) => {

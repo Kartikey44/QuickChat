@@ -57,7 +57,7 @@ router.put(
   markMessagesAsRead
 );
 router.delete(
-  "/clear/:id",
+  "/clear/:userId",
   protectRoute,
   clearChat
 );

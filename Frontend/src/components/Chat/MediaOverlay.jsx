@@ -5,9 +5,14 @@ import { IoClose } from "react-icons/io5";
 function MediaOverlay({ messages, onClose }) {
   const [activeTab, setActiveTab] = useState("images");
 
-  const images = useMemo(() => {
-    return messages.filter((msg) => msg.image);
-  }, [messages]);
+ const images = useMemo(() => {
+   console.log(
+     "Images",
+     messages.filter((msg) => msg.image),
+   );
+
+   return messages.filter((msg) => msg.image);
+ }, [messages]);
 
   const videos = useMemo(() => {
     return messages.filter((msg) => msg.video);

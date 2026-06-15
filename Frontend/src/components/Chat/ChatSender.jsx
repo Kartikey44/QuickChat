@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
+
 import { ImagePlus, SendHorizonal, X } from "lucide-react";
 
 import { useChat } from "../../context/ChatContext";
+
 import { useAuth } from "../../context/AuthContext";
 
 function ChatSender() {
@@ -13,35 +15,51 @@ function ChatSender() {
 
   const typingRef = useRef(null);
 
-  const { selectedUser, sendMessage } = useChat();
+  const { selectedUser, sendMessage, sendAIMessage } = useChat();
 
   const { socket } = useAuth();
 
-  const handleSend = async () => {
-    if (!selectedUser?._id) return;
+ const handleSend = async () => {
+   if (!selectedUser?._id) return;
 
-    if (!tempMessage.trim() && !file) return;
+   const messageText = tempMessage.trim();
 
-    try {
-      await sendMessage({
-        content: tempMessage,
-        receiverId: selectedUser._id,
-        file,
-      });
+   if (!messageText && !file) return;
 
-      setTempMessage("");
-      setFile(null);
-      setPreview(null);
+   const currentFile = file;
 
-      socket?.emit("stopTyping", {
-        receiverId: selectedUser._id,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
+   // Clear UI immediately
+   setTempMessage("");
+   setFile(null);
+   setPreview(null);
+
+   try {
+     if (selectedUser?.isAI) {
+       await sendAIMessage(messageText);
+       return;
+     }
+
+     await sendMessage({
+       content: messageText,
+       receiverId: selectedUser._id,
+       file: currentFile,
+     });
+
+     socket?.emit("stopTyping", {
+       receiverId: selectedUser._id,
+     });
+   } catch (error) {
+     console.log(error);
+
+     // Optional: restore message if send fails
+     setTempMessage(messageText);
+   }
+ };
 
   const handleTyping = () => {
+    // DON'T EMIT TYPING FOR AI
+    if (selectedUser?.isAI) return;
+
     if (!selectedUser || !socket) return;
 
     socket.emit("typing", {
@@ -77,6 +95,7 @@ function ChatSender() {
 
   return (
     <>
+      {/* IMAGE PREVIEW */}
       {preview && (
         <div className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="absolute top-[-120px] left-[20%] w-[300px] h-[300px] bg-red-700/20 blur-3xl rounded-full"></div>
@@ -84,6 +103,7 @@ function ChatSender() {
           <div className="absolute bottom-[-120px] right-[10%] w-[300px] h-[300px] bg-pink-700/20 blur-3xl rounded-full"></div>
 
           <div className="relative w-full max-w-4xl max-h-[95vh] bg-[#140107]/95 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl backdrop-blur-2xl flex flex-col">
+            {/* HEADER */}
             <div className="flex items-center justify-between px-5 md:px-6 py-2 border-b border-white/10 bg-white/5 shrink-0">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-500/20 flex items-center justify-center">
@@ -102,6 +122,7 @@ function ChatSender() {
               <button
                 onClick={() => {
                   setFile(null);
+
                   setPreview(null);
                 }}
                 className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 flex items-center justify-center transition-all duration-300"
@@ -110,6 +131,7 @@ function ChatSender() {
               </button>
             </div>
 
+            {/* BODY */}
             <div className="flex-1 overflow-y-auto p-4 md:p-5">
               <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-black/40 flex items-center justify-center">
                 <img
@@ -117,20 +139,6 @@ function ChatSender() {
                   alt="preview"
                   className="w-full max-h-[50vh] md:max-h-[65vh] object-contain"
                 />
-
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent px-5 py-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-white font-medium">Selected Image</p>
-
-                    <p className="text-zinc-400 text-sm">
-                      High quality preview ready
-                    </p>
-                  </div>
-
-                  <div className="hidden md:flex px-4 py-2 rounded-2xl bg-white/10 border border-white/10 text-white text-sm backdrop-blur-lg">
-                    Image Attached
-                  </div>
-                </div>
               </div>
 
               {tempMessage && (
@@ -147,6 +155,7 @@ function ChatSender() {
                 <button
                   onClick={() => {
                     setFile(null);
+
                     setPreview(null);
                   }}
                   className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-zinc-300 hover:bg-white/10 transition-all duration-300"
@@ -167,30 +176,35 @@ function ChatSender() {
         </div>
       )}
 
+      {/* CHAT INPUT */}
       <div className="relative w-full">
         <div className="flex items-center gap-3 bg-white/5 border border-white/10 backdrop-blur-2xl rounded-full px-4 py-2 shadow-2xl">
-          <label className="group flex items-center justify-center min-w-[48px] h-12 rounded-full bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 cursor-pointer transition-all duration-300">
-            <ImagePlus
-              size={20}
-              className="text-zinc-300 group-hover:text-red-300 transition"
-            />
+          {/* IMAGE BUTTON */}
+          {!selectedUser?.isAI && (
+            <label className="group flex items-center justify-center min-w-[48px] h-12 rounded-full bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 cursor-pointer transition-all duration-300">
+              <ImagePlus
+                size={20}
+                className="text-zinc-300 group-hover:text-red-300 transition"
+              />
 
-            <input
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={(e) => {
-                const selectedFile = e.target.files[0];
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => {
+                  const selectedFile = e.target.files[0];
 
-                if (selectedFile) {
-                  setFile(selectedFile);
+                  if (selectedFile) {
+                    setFile(selectedFile);
 
-                  setPreview(URL.createObjectURL(selectedFile));
-                }
-              }}
-            />
-          </label>
+                    setPreview(URL.createObjectURL(selectedFile));
+                  }
+                }}
+              />
+            </label>
+          )}
 
+          {/* INPUT */}
           <div className="flex-1">
             <input
               type="text"
@@ -201,15 +215,19 @@ function ChatSender() {
                 handleTyping();
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
                   handleSend();
                 }
               }}
-              placeholder="Type a message..."
+              placeholder={
+                selectedUser?.isAI ? "Ask AI anything..." : "Type a message..."
+              }
               className="w-full bg-transparent text-white placeholder:text-zinc-500 outline-none text-[15px]"
             />
           </div>
 
+          {/* SEND */}
           <button
             onClick={handleSend}
             disabled={!tempMessage.trim() && !file}

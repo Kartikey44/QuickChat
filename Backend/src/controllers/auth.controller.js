@@ -7,13 +7,15 @@ export const signup = async (req, res) => {
   try {
     const { name, email, password, mobile } = req.body;
 
-    if (!name || !email || !password || !mobile) {
+    // Required fields
+    if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: "Name, email and password are required",
       });
     }
 
+    // Name validation
     if (name.trim().length < 3) {
       return res.status(400).json({
         success: false,
@@ -21,6 +23,7 @@ export const signup = async (req, res) => {
       });
     }
 
+    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(email)) {
@@ -30,15 +33,19 @@ export const signup = async (req, res) => {
       });
     }
 
-    // Mobile validation
-    const mobileRegex = /^[6-9]\d{9}$/;
+    // Mobile validation (optional)
+    if (mobile) {
+      const mobileRegex = /^[6-9]\d{9}$/;
 
-    if (!mobileRegex.test(mobile)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid mobile number",
-      });
+      if (!mobileRegex.test(mobile)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid mobile number",
+        });
+      }
     }
+
+    // Password validation
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
@@ -57,11 +64,17 @@ export const signup = async (req, res) => {
       });
     }
 
+    // Duplicate user check
+    const duplicateQuery = [
+      { email: email.toLowerCase() },
+    ];
+
+    if (mobile) {
+      duplicateQuery.push({ mobile });
+    }
+
     const existingUser = await User.findOne({
-      $or: [
-        { email: email.toLowerCase() },
-        { mobile },
-      ],
+      $or: duplicateQuery,
     });
 
     if (existingUser) {
@@ -74,41 +87,53 @@ export const signup = async (req, res) => {
       });
     }
 
+    // Hash password
     const hashedPassword =
       await User.hashPassword(password);
 
+    // Create user
+    const userData = {
+  name: name.trim(),
+  email: email.toLowerCase(),
+  password: hashedPassword,
+};
 
+if (mobile) {
+  userData.mobile = mobile;
+}
 
-    const user = await User.create({
-      name: name.trim(),
-      email: email.toLowerCase(),
-      mobile,
-      password: hashedPassword,
-    });
+const user = await User.create(userData);
+    // Generate token
     const token = user.generateAuthToken();
-      res.cookie("token", token, {
+
+    res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite:
+        process.env.NODE_ENV === "production"
+          ? "none"
+          : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    res.status(200).json({
+
+    return res.status(201).json({
       success: true,
-      message: "Login successful",
+      message: "User registered successfully",
       user: {
-      _id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
+        mobile: user.mobile,
         profileimg: user.profileimg,
         bio: user.bio,
-        mobile: user.mobile,
       },
     });
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    res.status(500).json({
+    console.error("SIGNUP ERROR:", err);
+
+    return res.status(500).json({
       success: false,
-      message: err.message,
+      message: err.message || "Internal server error",
     });
   }
 };

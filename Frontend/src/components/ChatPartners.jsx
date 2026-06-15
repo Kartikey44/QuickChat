@@ -36,6 +36,12 @@ export default function ChatPartners({ searchQuery = "" }) {
   const handleSelectUser = (chat) => {
     selectUser(chat);
 
+    if (chat.isAI) {
+      navigate("/chat/ai-assistant");
+
+      return;
+    }
+
     navigate(`/chat/${chat._id}`);
   };
 
@@ -55,6 +61,7 @@ export default function ChatPartners({ searchQuery = "" }) {
             }`}
           >
             <div className="w-full flex items-center gap-3">
+              {/* AVATAR */}
               <div className="relative shrink-0">
                 <img
                   src={chat.profileimg || Avatar}
@@ -68,8 +75,19 @@ export default function ChatPartners({ searchQuery = "" }) {
                 )}
               </div>
 
+              {/* INFO */}
               <div className="flex items-center justify-between w-full min-w-0">
-                <p className="text-white truncate">{chat.name || chat.email}</p>
+                <div className="flex flex-col min-w-0">
+                  <p className="text-white truncate">
+                    {chat.name || chat.email}
+                  </p>
+
+                  {chat.isAI && (
+                    <span className="w-fit mt-1 text-[10px] bg-cyan-500/20 text-cyan-300 px-2 py-[2px] rounded-full">
+                      AI Assistant
+                    </span>
+                  )}
+                </div>
 
                 {unreadCount > 0 && (
                   <span className="text-xs text-red-300 font-medium shrink-0">

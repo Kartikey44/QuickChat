@@ -80,10 +80,11 @@ export const AuthProvider = ({ children }) => {
       setAuthUser(res.data.user);
 
       toast.success("Account created successfully!");
-
+      console.log(res.data);
       return res.data;
     } catch (error) {
-      toast.error(error.response?.data?.message || "Signup failed");
+      console.log(error.response?.data);
+      console.log(error.response?.status);
     } finally {
       setSigningUp(false);
     }

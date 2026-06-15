@@ -1,19 +1,22 @@
 import React, { useRef, useState, useEffect } from "react";
-import { MessageSquarePlus, Settings, User, LogOut } from "lucide-react";
 
+import { MessageSquarePlus, Settings, User, LogOut, Bot } from "lucide-react";
+import AI_logo from '../../assets/AI_logo.png'
 import { useAuth } from "../../context/AuthContext";
 import { useData } from "../../context/DataContext";
+import { useChat } from "../../context/ChatContext";
 
 function ProfileHeader() {
   const { authUser, logout } = useAuth();
 
   const { setShowContacts, setShowProfile } = useData();
 
+  const { openAIChat } = useChat();
+
   const [openDropdown, setOpenDropdown] = useState(false);
 
   const dropdownRef = useRef(null);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -38,7 +41,15 @@ function ProfileHeader() {
 
         {/* RIGHT ACTIONS */}
         <div className="flex items-center gap-2 relative">
-          {/* New Chat */}
+          {/* AI CHAT */}
+          <button
+            onClick={openAIChat}
+            className="group cursor-pointer flex items-center justify-center w-11 h-11 rounded-2xl bg-linear-to-br from-cyan-500 to-blue-700 hover:scale-105 transition-all duration-300 shadow-lg shadow-cyan-900/40"
+          >
+            <img src={AI_logo} className="w-9 h-9 rounded-full" />
+          </button>
+
+          {/* NEW CHAT */}
           <button
             onClick={() => setShowContacts(true)}
             className="group flex items-center justify-center w-11 h-11 rounded-2xl cursor-pointer bg-linear-to-br from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 shadow-lg shadow-red-900/40 transition-all duration-300"
@@ -46,7 +57,7 @@ function ProfileHeader() {
             <MessageSquarePlus size={20} className="text-white" />
           </button>
 
-          {/* Settings */}
+          {/* SETTINGS */}
           <div ref={dropdownRef} className="relative">
             <button
               onClick={() => setOpenDropdown(!openDropdown)}
@@ -58,10 +69,10 @@ function ProfileHeader() {
               />
             </button>
 
-            {/* Dropdown */}
+            {/* DROPDOWN */}
             {openDropdown && (
               <div className="absolute right-0 top-14 w-52 rounded-2xl border border-white/10 bg-zinc-900 shadow-2xl overflow-hidden z-50">
-                {/* User Info */}
+                {/* USER INFO */}
                 <div className="px-4 py-3 border-b border-white/10">
                   <p className="text-sm text-white font-medium truncate">
                     {authUser?.fullName}
@@ -72,10 +83,11 @@ function ProfileHeader() {
                   </p>
                 </div>
 
-                {/* Profile */}
+                {/* PROFILE */}
                 <button
                   onClick={() => {
                     setShowProfile(true);
+
                     setOpenDropdown(false);
                   }}
                   className="w-full cursor-pointer flex items-center gap-3 px-4 py-3 text-sm text-zinc-300 hover:bg-white/5 transition"
@@ -84,7 +96,7 @@ function ProfileHeader() {
                   My Profile
                 </button>
 
-                {/* Logout */}
+                {/* LOGOUT */}
                 <button
                   onClick={logout}
                   className="w-full flex cursor-pointer items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition"

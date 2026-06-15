@@ -519,55 +519,49 @@ export const deleteMessage =
 /* CLEAR CHAT */
 /* ======================================== */
 
-export const clearChat =
-  async (req, res) => {
-    try {
-      const userToDelete =
-        req.params.id;
+export const clearChat = async (
+  req,
+  res,
+) => {
+  try {
+    const { userId } = req.params;
 
-      const myId =
-        req.user._id;
+    const currentUserId =
+      req.user._id;
 
-      await Message.deleteMany({
-        $or: [
-          {
-            senderId:
-              myId,
+    await Message.deleteMany({
+      $or: [
+        {
+          senderId:
+            currentUserId,
+          receiverId: userId,
+        },
+        {
+          senderId: userId,
+          receiverId:
+            currentUserId,
+        },
+      ],
+    });
 
-            receiverId:
-              userToDelete,
-          },
+    return res.status(200).json({
+      success: true,
+      message:
+        "Chat cleared successfully",
+    });
+  } catch (error) {
+    console.error(
+      "CLEAR CHAT ERROR:",
+      error
+    );
 
-          {
-            senderId:
-              userToDelete,
-
-            receiverId:
-              myId,
-          },
-        ],
-      });
-
-      res.status(200).json({
-        success: true,
-
-        message:
-          "Chat cleared",
-      });
-    } catch (error) {
-      console.log(
-        "clearChat error:",
-        error
-      );
-
-      res.status(500).json({
-        success: false,
-
-        message:
-          "Server Error",
-      });
-    }
-  };
+    return res.status(500).json({
+      success: false,
+      message:
+        "Failed to clear chat",
+    });
+  }
+};
 
 /* ======================================== */
 /* GET UNREAD COUNT */
