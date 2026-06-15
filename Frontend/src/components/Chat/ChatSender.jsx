@@ -125,7 +125,7 @@ function ChatSender() {
 
                   setPreview(null);
                 }}
-                className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 flex items-center justify-center transition-all duration-300"
+                className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 flex items-center cursor-pointer justify-center transition-all duration-300"
               >
                 <X size={20} className="text-zinc-300" />
               </button>
@@ -158,14 +158,14 @@ function ChatSender() {
 
                     setPreview(null);
                   }}
-                  className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-zinc-300 hover:bg-white/10 transition-all duration-300"
+                  className="px-6 py-3 rounded-2xl cursor-pointer bg-white/5 border border-white/10 text-zinc-300 hover:bg-white/10 transition-all duration-300"
                 >
                   Cancel
                 </button>
 
                 <button
                   onClick={handleSend}
-                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-semibold shadow-lg shadow-red-900/40 transition-all duration-300 flex items-center justify-center gap-2"
+                  className="px-6 py-3 rounded-2xl cursor-pointer bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-semibold shadow-lg shadow-red-900/40 transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <SendHorizonal size={18} />
                   Send Media

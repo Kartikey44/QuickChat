@@ -26,7 +26,6 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
       match: [/^[6-9]\d{9}$/, "Invalid mobile number"],
-      default: null,
     },
 
     isMobileVerified: {

@@ -61,7 +61,7 @@ function ProfileHeader() {
           <div ref={dropdownRef} className="relative">
             <button
               onClick={() => setOpenDropdown(!openDropdown)}
-              className="group flex items-center justify-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-gray-500/20 hover:border-gray-500/30 transition-all duration-300"
+              className="group flex items-center justify-center w-11 h-11 rounded-2xl bg-white/5 border border-white/10 hover:bg-gray-500/20 cursor-pointer  hover:border-gray-500/30 transition-all duration-300"
             >
               <Settings
                 size={19}

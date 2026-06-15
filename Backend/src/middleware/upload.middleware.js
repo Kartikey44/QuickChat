@@ -100,17 +100,21 @@ export const uploadChatImage = multer({
 const profileStorage = new CloudinaryStorage({
   cloudinary,
 
-  params: {
+  params: async () => ({
     folder: "profile_images",
 
     resource_type: "image",
 
-    allowed_formats: [
-      "jpg",
-      "jpeg",
-      "png",
-    ],
-  },
+    allowed_formats: ["jpg", "jpeg", "png"],
+
+    width: 300,
+    height: 300,
+    crop: "fill",
+
+    quality: "auto",
+
+    fetch_format: "auto",
+  }),
 });
 
 export const uploadProfileImage = multer({

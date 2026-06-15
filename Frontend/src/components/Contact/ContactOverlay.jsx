@@ -42,7 +42,7 @@ function ContactOverlay({ onClose }) {
 
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-zinc-800 transition"
+            className="p-2 cursor-pointer rounded-full hover:bg-zinc-800 transition"
           >
             <IoClose size={24} className="text-zinc-300" />
           </button>

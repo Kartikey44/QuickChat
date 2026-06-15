@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Avatar from "../../assets/Avatar.png";
-
+import imageCompression from "browser-image-compression";
 import { RiArrowRightLongLine } from "react-icons/ri";
 import { GiCrossMark } from "react-icons/gi";
 import { FaPencilAlt } from "react-icons/fa";
@@ -84,15 +84,33 @@ function ProfileOverlay() {
     }));
   };
 
-  const handleImageChange = (e) => {
+const handleImageChange = async (e) => {
+  try {
     const file = e.target.files[0];
 
     if (!file) return;
 
-    setImage(file);
+    const compressedFile = await imageCompression(file, {
+      maxSizeMB: 0.5,
+      maxWidthOrHeight: 800,
+      useWebWorker: true,
+    });
 
-    setPreview(URL.createObjectURL(file));
-  };
+    setImage(compressedFile);
+    setPreview(URL.createObjectURL(compressedFile));
+
+    console.log("Original:", (file.size / 1024 / 1024).toFixed(2), "MB");
+
+    console.log(
+      "Compressed:",
+      (compressedFile.size / 1024 / 1024).toFixed(2),
+      "MB",
+    );
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to process image");
+  }
+};
 
   const handleEdit = (fieldKey) => {
     setEditingField(fieldKey);
@@ -188,7 +206,7 @@ function ProfileOverlay() {
             onClick={() => setShowProfile(false)}
             className="p-2 rounded-full hover:bg-zinc-800 transition"
           >
-            <IoClose size={24} className="text-zinc-300" />
+            <IoClose size={24} className="cursor-pointer text-zinc-300" />
           </button>
         </div>
 
@@ -302,14 +320,14 @@ function ProfileOverlay() {
         <div className="sticky bottom-0 bg-[#271111] border-t border-zinc-800 p-5 flex gap-4">
           <button
             onClick={() => setShowProfile(false)}
-            className="flex-1 py-3 rounded-xl bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition font-medium"
+            className="flex-1 py-3 rounded-xl cursor-pointer bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition font-medium"
           >
             Cancel
           </button>
 
           <button
             onClick={handleSubmit}
-            className="flex-1 py-3 rounded-xl bg-cyan-500 text-white hover:opacity-90 transition font-medium"
+            className="flex-1 py-3 rounded-xl cursor-pointer bg-cyan-500 text-white hover:opacity-90 transition font-medium"
           >
             {loading ? "Saving..." : "Save Changes"}
           </button>

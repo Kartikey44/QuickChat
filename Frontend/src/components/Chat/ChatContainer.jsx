@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-
+import NoChatStartContainer from "./NoChatStartContainer";
 import { useChat } from "../../context/ChatContext";
 import { useAuth } from "../../context/AuthContext";
-
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import ChatSender from "./ChatSender";
 import ChatHeader from "./ChatHeader";
 import TypingBubble from "./TypingBubble";
@@ -19,6 +20,10 @@ function ChatContainer() {
     editMessage,
     deleteMessage,
   } = useChat();
+
+    if (!selectedUser) {
+      return <NoChatStartContainer />;
+    }
 
   const { authUser } = useAuth();
 
@@ -137,9 +142,11 @@ function ChatContainer() {
                   )}
 
                   {msg.content && (
-                    <p className="break-words text-sm text-white mb-1">
-                      {msg.content}
-                    </p>
+                    <div className="prose prose-invert max-w-none text-sm">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
                   )}
 
                   <div className="flex justify-end">

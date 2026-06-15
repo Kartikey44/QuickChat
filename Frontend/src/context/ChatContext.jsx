@@ -183,11 +183,21 @@ export const ChatProvider = ({ children }) => {
         },
       });
 
-      if (res.data) {
-        const normalized = normalizeMessage(res.data);
+     if (res.data) {
+       const normalized = normalizeMessage(res.data);
 
-        setMessages((prev) => [...prev, normalized]);
-      }
+       setMessages((prev) => [...prev, normalized]);
+
+       const receiver = chats.find((user) => user._id === receiverId);
+
+       if (receiver) {
+         setChatPartners((prev) => {
+           const filtered = prev.filter((u) => u._id !== receiver._id);
+
+           return [receiver, ...filtered];
+         });
+       }
+     }
     } catch (error) {
       console.log("sendMessage error:", error.response?.data || error.message);
 
@@ -241,24 +251,33 @@ const sendAIMessage = async (content) => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("newMessage", (newMessage) => {
-      const normalizedMessage = normalizeMessage(newMessage);
+  socket.on("newMessage", (newMessage) => {
+    const normalizedMessage = normalizeMessage(newMessage);
 
-      const incomingSenderId = normalizedMessage.senderId;
+    const incomingSenderId = normalizedMessage.senderId;
 
-      const isActiveChat =
-        incomingSenderId?.toString() === selectedUser?._id?.toString();
+    const senderUser = chats.find((u) => u._id === incomingSenderId);
 
-      if (isActiveChat) {
-        setMessages((prev) => [...prev, normalizedMessage]);
-      } else {
-        setUnreadCounts((prev) => ({
-          ...prev,
+    if (senderUser) {
+      setChatPartners((prev) => {
+        const filtered = prev.filter((u) => u._id !== senderUser._id);
 
-          [incomingSenderId]: (prev[incomingSenderId] || 0) + 1,
-        }));
-      }
-    });
+        return [senderUser, ...filtered];
+      });
+    }
+
+    const isActiveChat =
+      incomingSenderId?.toString() === selectedUser?._id?.toString();
+
+    if (isActiveChat) {
+      setMessages((prev) => [...prev, normalizedMessage]);
+    } else {
+      setUnreadCounts((prev) => ({
+        ...prev,
+        [incomingSenderId]: (prev[incomingSenderId] || 0) + 1,
+      }));
+    }
+  });
 
     return () => {
       socket.off("newMessage");
