@@ -12,18 +12,7 @@ import MediaOverlay from "./MediaOverlay";
 import Avatar from "../../assets/Avatar.png";
 
 function ChatContainer() {
-  const {
-    selectedUser,
-    getMessages,
-    messages,
-    isTyping,
-    editMessage,
-    deleteMessage,
-  } = useChat();
-
-    if (!selectedUser) {
-      return <NoChatStartContainer />;
-    }
+  const { selectedUser, getMessages, messages, isTyping } = useChat();
 
   const { authUser } = useAuth();
 
@@ -31,7 +20,6 @@ function ChatContainer() {
 
   const [replyMessage, setReplyMessage] = useState(null);
   const [showMedia, setShowMedia] = useState(false);
-
   const [selectedMessage, setSelectedMessage] = useState(null);
 
   const [menuPosition, setMenuPosition] = useState({
@@ -50,7 +38,7 @@ function ChatContainer() {
     if (selectedUser?.isAI) return;
 
     getMessages(selectedUser._id);
-  }, [selectedUser]);
+  }, [selectedUser, getMessages]);
 
   useEffect(() => {
     const closeMenu = () => {
@@ -73,7 +61,10 @@ function ChatContainer() {
       x: e.clientX,
       y: e.clientY,
     });
-  };
+  }
+  if (!selectedUser) {
+    return <NoChatStartContainer />;
+  }
 
   return (
     <div className="relative flex h-full w-full flex-col bg-[#2a0f0f] overflow-hidden">

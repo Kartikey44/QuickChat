@@ -58,8 +58,6 @@ function ContactOverlay({ onClose }) {
           {filtered.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-zinc-500">
               <p className="text-lg">No users found</p>
-
-              <span className="text-sm mt-1">Try another keyword</span>
             </div>
           ) : (
             filtered.map((user) => {
@@ -73,7 +71,7 @@ function ContactOverlay({ onClose }) {
 
                     if (onClose) onClose();
                   }}
-                  className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-zinc-800 transition-all duration-200 text-left"
+                  className="w-full flex items-center cursor-pointer gap-4 p-3 rounded-2xl hover:bg-zinc-800 transition-all duration-200 text-left"
                 >
                   {/* Avatar */}
                   <div className="relative">
