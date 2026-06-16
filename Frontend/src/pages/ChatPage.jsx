@@ -29,11 +29,13 @@ export default function ChatPage() {
   } = useChat();
 
   useEffect(() => {
-    if (!user_id || chatPartners.length === 0) {
-      setSelectedUser(null);
+   if (!user_id) {
+     return;
+   }
 
-      return;
-    }
+   if (chatPartners.length === 0) {
+     return;
+   }
 
     const user = chatPartners.find((u) => u._id === user_id);
 

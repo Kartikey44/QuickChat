@@ -5,10 +5,14 @@ import ContactSearchBar from "./ContactSearchBar";
 import Avatar from "../../assets/Avatar.png";
 
 import { useChat } from "../../context/ChatContext";
+import { useAuth } from "../../context/AuthContext";
 import { IoClose } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 
 function ContactOverlay({ onClose }) {
-  const { chats, selectUser, onlineUsers } = useChat();
+  const navigate =useNavigate()
+  const { chats, selectUser } = useChat();
+  const { authUser, socket, onlineUsers } = useAuth();
 
   const [q, setQ] = useState("");
 
@@ -68,7 +72,7 @@ function ContactOverlay({ onClose }) {
                   key={user._id}
                   onClick={() => {
                     selectUser(user);
-
+                    navigate(`/chat/${user._id}`);
                     if (onClose) onClose();
                   }}
                   className="w-full flex items-center cursor-pointer gap-4 p-3 rounded-2xl hover:bg-zinc-800 transition-all duration-200 text-left"

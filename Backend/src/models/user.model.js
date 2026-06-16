@@ -27,6 +27,14 @@ const userSchema = new mongoose.Schema(
       sparse: true,
       match: [/^[6-9]\d{9}$/, "Invalid mobile number"],
     },
+    dailyAiCount: {
+  type: Number,
+  default: 0,
+},
+dailyAiDate: {
+  type: Date,
+  default: Date.now,
+},
 
     isMobileVerified: {
       type: Boolean,

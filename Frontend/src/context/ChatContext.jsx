@@ -265,9 +265,9 @@ const sendAIMessage = async (content) => {
         return [senderUser, ...filtered];
       });
     }
-
-    const isActiveChat =
-      incomingSenderId?.toString() === selectedUser?._id?.toString();
+const isActiveChat =
+  normalizedMessage.senderId?.toString() === selectedUser?._id?.toString() ||
+  normalizedMessage.receiverId?.toString() === selectedUser?._id?.toString();
 
     if (isActiveChat) {
       setMessages((prev) => [...prev, normalizedMessage]);
@@ -282,7 +282,7 @@ const sendAIMessage = async (content) => {
     return () => {
       socket.off("newMessage");
     };
-  }, [socket, selectedUser]);
+  }, [socket, selectedUser, chats]);
 
   useEffect(() => {
     if (authUser) {
