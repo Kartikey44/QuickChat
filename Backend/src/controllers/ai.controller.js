@@ -16,12 +16,39 @@ export const chatWithAI = async (req, res) => {
       });
     }
 
-    // Daily AI limit check
-    const today = new Date().toDateString();
+    const cleanMessage = message.trim();
+
+    // Quick greeting handling
+    const greetings = [
+      "hi",
+      "hello",
+      "hey",
+      "namaste",
+      "good morning",
+      "good afternoon",
+      "good evening",
+    ];
+
+    if (
+      greetings.includes(
+        cleanMessage.toLowerCase()
+      )
+    ) {
+      return res.status(200).json({
+        success: true,
+        reply: "Hi! How can I help you today?",
+      });
+    }
+
+    // Reset daily count if date changed
+    const today =
+      new Date().toDateString();
 
     if (
       !user.dailyAiDate ||
-      new Date(user.dailyAiDate).toDateString() !== today
+      new Date(
+        user.dailyAiDate
+      ).toDateString() !== today
     ) {
       user.dailyAiCount = 0;
       user.dailyAiDate = new Date();
@@ -30,7 +57,11 @@ export const chatWithAI = async (req, res) => {
 
     const DAILY_LIMIT = 20;
 
-    if (user.dailyAiCount >= DAILY_LIMIT) {
+    // Check limit BEFORE saving message
+    if (
+      user.dailyAiCount >=
+      DAILY_LIMIT
+    ) {
       return res.status(429).json({
         success: false,
         message:
@@ -42,91 +73,83 @@ export const chatWithAI = async (req, res) => {
     await AIMessage.create({
       userId,
       role: "user",
-      content: message.trim(),
+      content: cleanMessage,
       conversationId,
     });
 
-    // Get conversation history
-    const previousMessages = await AIMessage.find({
-      userId,
-      conversationId,
-    })
-      .sort({ createdAt: 1 })
-      .limit(20);
+    // Fetch conversation history
+    const previousMessages =
+      await AIMessage.find({
+        userId,
+        conversationId,
+      })
+        .sort({
+          createdAt: 1,
+        })
+        .limit(15);
 
-    const formattedMessages = [
-      {
-        role: "system",
-        content: `
-You are Namaste AI.
-
-Rules:
-1. Answer only what the user asks.
-2. Do not suggest extra tasks, features, improvements, or related topics unless explicitly requested.
-3. For greetings like Hi, Hello, Namaste, respond with a simple greeting and ask how you can help.
-4. Keep responses concise and relevant.
-5. Do not assume the user's intent.
-6. If information is missing, ask a clarification question.
-7. Avoid long introductions and conclusions.
-8. Provide code, examples, or step-by-step explanations only when requested.
-
-Response Format:
-
-Answer:
-<direct answer>
-
-Need More Information:
-<only if required>
-        `,
-      },
-
-      ...previousMessages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
-    ];
+    const formattedMessages =
+      previousMessages.map(
+        (msg) => ({
+          role: msg.role,
+          content: msg.content,
+        })
+      );
 
     // Generate AI response
     const aiReply =
-      await generateAIResponse(formattedMessages);
+      await generateAIResponse(
+        formattedMessages
+      );
 
-    // Increment daily usage count
+    // Increment usage count
     user.dailyAiCount += 1;
     await user.save();
 
-    // Save AI response
-    const savedAIMessage = await AIMessage.create({
-      userId,
-      role: "assistant",
-      content: aiReply,
-      conversationId,
-    });
+    // Save AI reply
+    const savedAIMessage =
+      await AIMessage.create({
+        userId,
+        role: "assistant",
+        content: aiReply,
+        conversationId,
+      });
 
     return res.status(200).json({
       success: true,
       reply: aiReply,
       message: savedAIMessage,
       remainingRequests:
-        DAILY_LIMIT - user.dailyAiCount,
+        DAILY_LIMIT -
+        user.dailyAiCount,
     });
   } catch (error) {
-    console.error("AI CONTROLLER ERROR:", error);
+    console.error(
+      "AI CONTROLLER ERROR:",
+      error
+    );
 
     if (
-      error.message?.includes("429") ||
-      error.message?.toLowerCase().includes("quota")
+      error.message?.includes(
+        "429"
+      ) ||
+      error.message
+        ?.toLowerCase()
+        .includes("quota")
     ) {
       return res.status(429).json({
         success: false,
         message:
           "AI service is temporarily unavailable due to quota limits. Please try again later.",
-        error: error.message,
+        error:
+          error.message,
       });
     }
 
     return res.status(500).json({
       success: false,
-      message: "AI request failed",
+      message:
+        "AI request failed",
       error: error.message,
     });
   }
