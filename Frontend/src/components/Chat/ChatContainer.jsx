@@ -34,13 +34,6 @@ function ChatContainer() {
   }, [messages, isTyping]);
 
   useEffect(() => {
-    if (!selectedUser?._id) return;
-    if (selectedUser?.isAI) return;
-
-    getMessages(selectedUser._id);
-  }, [selectedUser, getMessages]);
-
-  useEffect(() => {
     const closeMenu = () => {
       setSelectedMessage(null);
     };

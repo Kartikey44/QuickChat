@@ -248,41 +248,59 @@ const sendAIMessage = async (content) => {
 
     getMessages(selectedUser._id);
   }, [selectedUser]);
+ useEffect(() => {
+   if (!socket) return;
+
+   const handleNewMessage = (newMessage) => {
+     const normalizedMessage = normalizeMessage(newMessage);
+
+     const incomingSenderId = normalizedMessage.senderId;
+
+     const senderUser = chats.find((u) => u._id === incomingSenderId);
+
+     if (senderUser) {
+       setChatPartners((prev) => {
+         const filtered = prev.filter((u) => u._id !== senderUser._id);
+
+         return [senderUser, ...filtered];
+       });
+     }
+
+     const isActiveChat =
+       normalizedMessage.senderId?.toString() ===
+         selectedUser?._id?.toString() ||
+       normalizedMessage.receiverId?.toString() ===
+         selectedUser?._id?.toString();
+
+     if (isActiveChat) {
+       setMessages((prev) => {
+         const exists = prev.some((m) => m._id === normalizedMessage._id);
+
+         if (exists) return prev;
+
+         return [...prev, normalizedMessage];
+       });
+     } else {
+       setUnreadCounts((prev) => ({
+         ...prev,
+         [incomingSenderId]: (prev[incomingSenderId] || 0) + 1,
+       }));
+     }
+   };
+
+   socket.on("newMessage", handleNewMessage);
+
+   return () => {
+     socket.off("newMessage", handleNewMessage);
+   };
+ }, [socket, selectedUser, chats]);
   useEffect(() => {
-    if (!socket) return;
+    console.log("Selected User:", selectedUser);
+  }, [selectedUser]);
 
-  socket.on("newMessage", (newMessage) => {
-    const normalizedMessage = normalizeMessage(newMessage);
-
-    const incomingSenderId = normalizedMessage.senderId;
-
-    const senderUser = chats.find((u) => u._id === incomingSenderId);
-
-    if (senderUser) {
-      setChatPartners((prev) => {
-        const filtered = prev.filter((u) => u._id !== senderUser._id);
-
-        return [senderUser, ...filtered];
-      });
-    }
-const isActiveChat =
-  normalizedMessage.senderId?.toString() === selectedUser?._id?.toString() ||
-  normalizedMessage.receiverId?.toString() === selectedUser?._id?.toString();
-
-    if (isActiveChat) {
-      setMessages((prev) => [...prev, normalizedMessage]);
-    } else {
-      setUnreadCounts((prev) => ({
-        ...prev,
-        [incomingSenderId]: (prev[incomingSenderId] || 0) + 1,
-      }));
-    }
-  });
-
-    return () => {
-      socket.off("newMessage");
-    };
-  }, [socket, selectedUser, chats]);
+  useEffect(() => {
+    console.log("Messages:", messages.length);
+  }, [messages]);
 
   useEffect(() => {
     if (authUser) {

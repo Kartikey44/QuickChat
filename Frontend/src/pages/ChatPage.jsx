@@ -28,27 +28,25 @@ export default function ChatPage() {
     markAsRead,
   } = useChat();
 
-  useEffect(() => {
-   if (!user_id) {
-     return;
-   }
+useEffect(() => {
+  if (!user_id) return;
 
-   if (chatPartners.length === 0) {
-     return;
-   }
+  const user = chatPartners.find(
+    (u) => u._id?.toString() === user_id?.toString(),
+  );
 
-    const user = chatPartners.find((u) => u._id === user_id);
+  if (!user) return;
 
-    if (!user) return;
-
+  if (selectedUser?._id !== user._id) {
     setSelectedUser(user);
+  }
 
-    getMessages(user_id);
+  getMessages(user_id);
 
-    if (unreadCounts[user_id] > 0) {
-      markAsRead(user_id);
-    }
-  }, [user_id, chatPartners]);
+  if (unreadCounts?.[user_id] > 0 && markAsRead) {
+    markAsRead(user_id);
+  }
+}, [user_id, chatPartners]);
 
   useEffect(() => {
     const handleBackButton = () => {
