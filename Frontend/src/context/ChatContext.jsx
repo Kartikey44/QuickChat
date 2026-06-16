@@ -159,7 +159,22 @@ export const ChatProvider = ({ children }) => {
      toast.error("Failed to delete chat");
    }
   };
-  
+  const loadAIConversation = async () => {
+    try {
+      const res = await axiosInstance.get("/ai/conversation/default-ai-chat");
+
+      const formattedMessages = res.data.messages.map((msg) => ({
+        _id: msg._id,
+        senderId: msg.role === "assistant" ? "ai-assistant" : authUser._id,
+        content: msg.content,
+        createdAt: msg.createdAt,
+      }));
+
+      setAiMessages(formattedMessages);
+    } catch (error) {
+      console.log("LOAD AI CHAT ERROR:", error);
+    }
+  };
 
   const sendMessage = async ({ content, receiverId, file, replyTo }) => {
     try {
@@ -222,6 +237,9 @@ const sendAIMessage = async (content) => {
       conversationId: "default-ai-chat",
     });
 
+    console.log("PROMPT:", content);
+    console.log("RESPONSE:", res.data.reply);
+
     const aiMessage = {
       _id: crypto.randomUUID(),
       senderId: "ai-assistant",
@@ -229,7 +247,12 @@ const sendAIMessage = async (content) => {
       createdAt: new Date(),
     };
 
-    setAiMessages((prev) => [...prev, aiMessage]);
+    setAiMessages((prev) => {
+      const exists = prev.some((m) => m._id === aiMessage._id);
+      if (exists) return prev;
+
+      return [...prev, aiMessage];
+    });
   } catch (error) {
     console.log("AI ERROR:", error.response?.data);
 
@@ -240,14 +263,8 @@ const sendAIMessage = async (content) => {
     setIsAllTyping(false);
   }
   };
+  
   const currentMessages = selectedUser?.isAI ? aiMessages : messages;
-  useEffect(() => {
-    if (!selectedUser?._id) return;
-
-    if (selectedUser.isAI) return;
-
-    getMessages(selectedUser._id);
-  }, [selectedUser]);
  useEffect(() => {
    if (!socket) return;
 
@@ -301,7 +318,11 @@ const sendAIMessage = async (content) => {
   useEffect(() => {
     console.log("Messages:", messages.length);
   }, [messages]);
-
+  useEffect(() => {
+    if (selectedUser?.isAI) {
+      loadAIConversation();
+    }
+  }, [selectedUser]);
   useEffect(() => {
     if (authUser) {
       getContactsData();

@@ -4,7 +4,11 @@ import { getOrCreateConversationId } from "../utils/conversation.helper.js";
 
 export const chatWithAI = async (req, res) => {
   try {
-    const { message, conversationId } = req.body;
+    const { message } = req.body;
+
+    const conversationId = getOrCreateConversationId(
+      req.body.conversationId,
+    );
 
     const user = req.user;
     const userId = user._id;
@@ -18,7 +22,6 @@ export const chatWithAI = async (req, res) => {
 
     const cleanMessage = message.trim();
 
-    // Quick greeting handling
     const greetings = [
       "hi",
       "hello",
@@ -29,26 +32,36 @@ export const chatWithAI = async (req, res) => {
       "good evening",
     ];
 
-    if (
-      greetings.includes(
-        cleanMessage.toLowerCase()
-      )
-    ) {
+    // Greeting handling
+    if (greetings.includes(cleanMessage.toLowerCase())) {
+      const greetingReply = "Hi! How can I help you today?";
+
+      await AIMessage.create({
+        userId,
+        role: "user",
+        content: cleanMessage,
+        conversationId,
+      });
+
+      await AIMessage.create({
+        userId,
+        role: "assistant",
+        content: greetingReply,
+        conversationId,
+      });
+
       return res.status(200).json({
         success: true,
-        reply: "Hi! How can I help you today?",
+        reply: greetingReply,
       });
     }
 
-    // Reset daily count if date changed
-    const today =
-      new Date().toDateString();
+    // Reset daily limit if date changed
+    const today = new Date().toDateString();
 
     if (
       !user.dailyAiDate ||
-      new Date(
-        user.dailyAiDate
-      ).toDateString() !== today
+      new Date(user.dailyAiDate).toDateString() !== today
     ) {
       user.dailyAiCount = 0;
       user.dailyAiDate = new Date();
@@ -57,104 +70,76 @@ export const chatWithAI = async (req, res) => {
 
     const DAILY_LIMIT = 20;
 
-    // Check limit BEFORE saving message
-    if (
-      user.dailyAiCount >=
-      DAILY_LIMIT
-    ) {
+    if (user.dailyAiCount >= DAILY_LIMIT) {
       return res.status(429).json({
         success: false,
         message:
           "Daily AI limit reached. Please try again tomorrow.",
       });
     }
+// Save user message
+await AIMessage.create({
+  userId,
+  role: "user",
+  content: cleanMessage,
+  conversationId,
+});
 
-    // Save user message
-    await AIMessage.create({
-      userId,
-      role: "user",
-      content: cleanMessage,
-      conversationId,
-    });
+console.log("=================================");
+console.log("CONVERSATION ID:", conversationId);
+console.log("USER MESSAGE:", cleanMessage);
+console.log("=================================");
 
-    // Fetch conversation history
-    const previousMessages =
-      await AIMessage.find({
-        userId,
-        conversationId,
-      })
-        .sort({
-          createdAt: 1,
-        })
-        .limit(15);
+// Generate response from ONLY current prompt
+const aiReply = await generateAIResponse(
+  cleanMessage,
+);
 
-    const formattedMessages =
-      previousMessages.map(
-        (msg) => ({
-          role: msg.role,
-          content: msg.content,
-        })
-      );
+console.log("AI REPLY:", aiReply);
 
-    // Generate AI response
-    const aiReply =
-      await generateAIResponse(
-        formattedMessages
-      );
+    console.log("AI REPLY:", aiReply);
 
-    // Increment usage count
+    // Increment usage
     user.dailyAiCount += 1;
     await user.save();
 
-    // Save AI reply
-    const savedAIMessage =
-      await AIMessage.create({
-        userId,
-        role: "assistant",
-        content: aiReply,
-        conversationId,
-      });
+    // Save AI response
+    const savedAIMessage = await AIMessage.create({
+      userId,
+      role: "assistant",
+      content: aiReply,
+      conversationId,
+    });
 
     return res.status(200).json({
       success: true,
       reply: aiReply,
       message: savedAIMessage,
       remainingRequests:
-        DAILY_LIMIT -
-        user.dailyAiCount,
+        DAILY_LIMIT - user.dailyAiCount,
     });
   } catch (error) {
-    console.error(
-      "AI CONTROLLER ERROR:",
-      error
-    );
+    console.error("AI CONTROLLER ERROR:", error);
 
     if (
-      error.message?.includes(
-        "429"
-      ) ||
-      error.message
-        ?.toLowerCase()
-        .includes("quota")
+      error.message?.includes("429") ||
+      error.message?.toLowerCase().includes("quota")
     ) {
       return res.status(429).json({
         success: false,
         message:
           "AI service is temporarily unavailable due to quota limits. Please try again later.",
-        error:
-          error.message,
+        error: error.message,
       });
     }
 
     return res.status(500).json({
       success: false,
-      message:
-        "AI request failed",
+      message: "AI request failed",
       error: error.message,
     });
   }
 };
-
 /* =========================
 GET AI CONVERSATION
 ========================= */
