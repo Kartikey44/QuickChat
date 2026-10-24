@@ -11,15 +11,17 @@ export const generateConversationId = () => {
 /**
  * Get conversation ID or create a new one
  */
-export const getOrCreateConversationId = (
-  conversationId,
-) => {
-  return (
-    conversationId ||
-    generateConversationId()
-  );
-};
+export const getOrCreateConversationId = (conversationId) => {
+  if (
+    typeof conversationId === "string" &&
+    conversationId.trim().length > 0 &&
+    conversationId.trim().length <= 128
+  ) {
+    return conversationId.trim();
+  }
 
+  return generateConversationId();
+};
 /**
  * Fetch recent chat history
  */

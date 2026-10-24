@@ -1,9 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
+
 import NoChatStartContainer from "./NoChatStartContainer";
 import { useChat } from "../../context/ChatContext";
 import { useAuth } from "../../context/AuthContext";
+
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
+
 import ChatSender from "./ChatSender";
 import ChatHeader from "./ChatHeader";
 import TypingBubble from "./TypingBubble";
@@ -12,7 +16,7 @@ import MediaOverlay from "./MediaOverlay";
 import Avatar from "../../assets/Avatar.png";
 
 function ChatContainer() {
-  const { selectedUser, getMessages, messages, isTyping } = useChat();
+  const { selectedUser, messages, isTyping } = useChat();
 
   const { authUser } = useAuth();
 
@@ -20,164 +24,221 @@ function ChatContainer() {
 
   const [replyMessage, setReplyMessage] = useState(null);
   const [showMedia, setShowMedia] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState(null);
 
-  const [menuPosition, setMenuPosition] = useState({
-    x: 0,
-    y: 0,
-  });
-
+  // Automatically scroll to the latest message.
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
+      block: "end",
     });
   }, [messages, isTyping]);
 
-  useEffect(() => {
-    const closeMenu = () => {
-      setSelectedMessage(null);
-    };
-
-    window.addEventListener("click", closeMenu);
-
-    return () => {
-      window.removeEventListener("click", closeMenu);
-    };
-  }, []);
-
-  const handleMessageMenu = (e, msg) => {
-    e.preventDefault();
-
-    setSelectedMessage(msg);
-
-    setMenuPosition({
-      x: e.clientX,
-      y: e.clientY,
-    });
-  }
   if (!selectedUser) {
     return <NoChatStartContainer />;
   }
 
   return (
-    <div className="relative flex h-full w-full flex-col bg-[#2a0f0f] overflow-hidden">
+    <div className="relative flex h-full w-full flex-col overflow-hidden bg-[#2a0f0f]">
       {/* HEADER */}
-      <div className="relative z-20 border-b border-zinc-800">
+
+      <div className="relative z-20 shrink-0 border-b border-zinc-800">
         <ChatHeader onOpenMedia={() => setShowMedia(true)} />
       </div>
 
       {/* CHAT BODY */}
-      <div className="flex-1 overflow-y-auto no-scrollbar z-0 space-y-5 bg-gradient-to-br from-[#271111] via-[#2a0f15] to-[#170206] px-4 py-5">
+
+      <div
+        className="
+          smooth-scroll
+          no-scrollbar
+          z-0
+          flex-1
+          space-y-5
+          overflow-y-auto
+          bg-gradient-to-br
+          from-[#271111]
+          via-[#2a0f15]
+          to-[#170206]
+          px-3
+          py-5
+          sm:px-4
+        "
+      >
         {Array.isArray(messages) &&
           messages.map((msg) => {
             const senderId = msg.senderId?._id || msg.senderId;
+
             const authId = authUser?._id;
 
             const isSender = senderId?.toString() === authId?.toString();
 
+            // Only assistant responses in AI chat use Markdown.
+            const isAIResponse = Boolean(selectedUser?.isAI && !isSender);
+
+            // Allow longer AI messages to use more screen space.
+            const bubbleWidth = isAIResponse
+              ? "max-w-[95%] sm:max-w-[90%] lg:max-w-[85%]"
+              : "max-w-[80%] sm:max-w-[75%]";
+
             return (
               <div
                 key={msg._id}
-                onContextMenu={(e) => handleMessageMenu(e, msg)}
-                className={`flex w-full items-end gap-2 ${
+                className={`flex w-full min-w-0 items-end gap-2 ${
                   isSender ? "justify-end" : "justify-start"
                 }`}
               >
+                {/* RECEIVER / AI AVATAR */}
+
                 {!isSender && (
                   <img
                     src={selectedUser?.profileimg || Avatar}
-                    alt="receiver"
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                    alt={`${selectedUser?.name || "Receiver"} avatar`}
+                    className="
+                      h-8 w-8 shrink-0
+                      rounded-full object-cover
+                    "
                   />
                 )}
 
+                {/* MESSAGE BUBBLE */}
+
                 <div
-                  className={`relative max-w-[75%] rounded-2xl px-4 py-3 shadow-md ${
+                  className={`relative min-w-0 ${bubbleWidth} rounded-2xl px-3 py-3 shadow-md sm:px-4 ${
                     isSender
-                      ? "rounded-br-sm bg-cyan-700"
-                      : "rounded-bl-sm bg-zinc-800"
+                      ? "rounded-br-sm bg-cyan-700 text-white"
+                      : "rounded-bl-sm bg-zinc-800 text-zinc-100"
                   }`}
                 >
+                  {/* IMAGE ATTACHMENT */}
+
                   {msg.image && (
                     <img
                       src={msg.image}
-                      alt="shared"
-                      className="max-w-[250px] rounded-xl mb-2 object-cover"
+                      alt="Shared attachment"
+                      loading="lazy"
+                      className="
+                        mb-2 max-h-80 max-w-full
+                        rounded-xl object-contain
+                      "
                     />
                   )}
+
+                  {/* VIDEO ATTACHMENT */}
 
                   {msg.video && (
                     <video
                       src={msg.video}
                       controls
-                      className="max-w-[250px] rounded-xl mb-2"
+                      preload="metadata"
+                      className="
+                        mb-2 max-h-80 max-w-full
+                        rounded-xl
+                      "
                     />
                   )}
+
+                  {/* DOCUMENT ATTACHMENT */}
 
                   {msg.document && (
                     <a
                       href={msg.document}
                       target="_blank"
-                      rel="noreferrer"
-                      className="block text-cyan-300 underline mb-2"
+                      rel="noopener noreferrer"
+                      className="
+                        mb-2 block break-words
+                        text-cyan-300 underline
+                      "
                     >
                       📄 Open Document
                     </a>
                   )}
 
-                  {msg.content && (
-                    <div className="prose prose-invert max-w-none text-sm">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {msg.content}
-                      </ReactMarkdown>
-                    </div>
-                  )}
+                  {/* MESSAGE CONTENT */}
 
-                  <div className="flex justify-end">
+                  {msg.content &&
+                    (isAIResponse ? (
+                      <div className="chat-markdown">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm, remarkBreaks]}
+                        >
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p
+                        className="
+                          m-0 whitespace-pre-wrap
+                          break-words text-sm leading-6
+                        "
+                      >
+                        {msg.content}
+                      </p>
+                    ))}
+
+                  {/* MESSAGE TIMESTAMP */}
+
+                  <div className="mt-2 flex justify-end">
                     <span className="text-[10px] text-zinc-300">
-                      {new Date(msg.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {msg.createdAt
+                        ? new Date(msg.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : ""}
                     </span>
                   </div>
                 </div>
 
+                {/* SENDER AVATAR */}
+
                 {isSender && (
                   <img
                     src={authUser?.profileimg || Avatar}
-                    alt="sender"
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                    alt="Your avatar"
+                    className="
+                      h-8 w-8 shrink-0
+                      rounded-full object-cover
+                    "
                   />
                 )}
               </div>
             );
           })}
 
+        {/* TYPING INDICATOR */}
+
         {isTyping && <TypingBubble isSender={false} />}
+
+        {/* SCROLL TARGET */}
 
         <div ref={messagesEndRef} />
       </div>
 
-      {/* SENDER */}
-      <div className="relative z-20 border-t border-zinc-800 bg-[#2a0f0f] px-1 py-2">
+      {/* MESSAGE INPUT */}
+
+      <div
+        className="
+          relative z-20 shrink-0
+          border-t border-zinc-800
+          bg-[#2a0f0f] px-1 py-2
+        "
+      >
         <ChatSender
           replyMessage={replyMessage}
           setReplyMessage={setReplyMessage}
         />
       </div>
 
-      {/* OVERLAYS */}
-      <div className="absolute inset-0 z-[9999] pointer-events-none">
-        {showMedia && (
-          <div className="pointer-events-auto">
-            <MediaOverlay
-              messages={messages}
-              onClose={() => setShowMedia(false)}
-            />
-          </div>
-        )}
-      </div>
+      {/* MEDIA OVERLAY */}
+
+      {showMedia && (
+        <div className="absolute inset-0 z-[9999]">
+          <MediaOverlay
+            messages={messages}
+            onClose={() => setShowMedia(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }
