@@ -4,7 +4,7 @@ QuickChat is a modern full-stack real-time chat application built using the MERN
 
 ## 🌐 Live Demo
 
-Frontend: https://quickchat-4e9d.onrender.com
+Frontend: https://quick-chat-tawny-eta.vercel.app/
 
 Backend: https://quickchat-4e9d.onrender.com
 
